@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Digital Dark Spot — AI-Assisted Information-Gap Detection</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- System Status Banner (Mock / Live mode indicator) -->
+  <header class="top-nav">
+    <div class="nav-container">
+      <div class="brand">
+        <div class="brand-radar">
+          <span class="radar-ping"></span>
+          <span class="radar-core"></span>
+        </div>
+        <div>
+          <h1 class="brand-title">DIGITAL DARK SPOT</h1>
+          <p class="brand-tagline">Evidence-First Information-Gap & Blindspot Engine</p>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <div id="llm-mode-badge" class="badge badge-mock">
+          <span class="dot"></span>
+          <span id="llm-mode-text">Checking LLM status...</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- Notice Banner -->
+    <div class="notice-bar">
+      <span class="notice-icon">🛡️</span>
+      <span class="notice-text">
+        <strong>Deterministic Verification Principle:</strong> LLM is restricted to narrow extraction. Every claim is strictly proven against raw source text using exact substring & rapidfuzz verification. Value digits must literally appear in the matched source span.
+      </span>
+    </div>
+
+    <!-- Step 1: Research Goal & Target Facets -->
+    <section class="card setup-card">
+      <div class="section-header">
+        <div class="step-num">1</div>
+        <div>
+          <h2>Define Research Goal & Target Facets</h2>
+          <p class="subtitle">Enter any research question or purchase decision. Generate dynamic facets with AI or pick a quick-start template, then customize dimensions before analysis.</p>
+        </div>
+      </div>
+
+      <div class="grid-form">
+        <div class="form-group full-width">
+          <label for="goal-input">Research Goal / Question (ANY Topic: Tech, Admissions, Subsidies, etc.)</label>
+          <div class="goal-input-row" style="display: flex; gap: 0.6rem; align-items: center;">
+            <input type="text" id="goal-input" value="Which high-performance laptop should I buy for AI engineering and 3D rendering under $2,500?" placeholder="e.g. Which laptop should I buy under $2,500? or Georgia Tech MS CS admission requirements" style="flex: 1;">
+            <button id="btn-generate-facets" class="btn btn-magic" type="button" title="Generate customized facets using AI">
+              <span>✨</span> Generate Facets with AI
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="domain-select">Quick-Start Template</label>
+          <select id="domain-select">
+            <option value="custom" selected>Custom / AI-Generated Facets</option>
+            <option value="laptop">Hardware & Laptop Purchase (6 Facets)</option>
+            <option value="college_admission">Graduate University Admissions (6 Facets)</option>
+            <option value="government_scheme">Government Welfare / Subsidy Scheme (6 Facets)</option>
+            <option value="scholarship">Scholarship & Welfare Schemes (Optional Quick-Start)</option>
+            <option value="generic">General Research Goal (5 Facets)</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="official-domain-input">Official Authority Domain (User Confirmed)</label>
+          <input type="text" id="official-domain-input" value="lenovo.com" placeholder="e.g. lenovo.com, gatech.edu, pmsuryaghar.gov.in">
+          <span class="input-hint">Used for deterministic authority scoring (confirmed vendor / .gov = Official)</span>
+        </div>
+
+        <div class="form-group">
+          <label for="target-cycle-input">Target Version / Period (Optional Override)</label>
+          <input type="text" id="target-cycle-input" placeholder="e.g. 2025, Fall 2025, Gen 7, 2025-26">
+          <span class="input-hint">Specify explicit version/period or auto-infer from newest official source</span>
+        </div>
+      </div>
+
+      <!-- Interactive Facets Editor -->
+      <div class="facets-editor-box">
+        <div class="facets-editor-header">
+          <div>
+            <div class="facet-box-title">Target Facets to Verify & Compare (<span id="facets-count">0</span>):</div>
+            <p style="font-size: 0.8rem; color: var(--text-muted); margin-top: 0.15rem;">Each facet has an assigned importance level and real-world failure consequence. You can customize them before running analysis.</p>
+          </div>
+          <button id="btn-toggle-add-facet" class="btn btn-secondary btn-small" type="button">+ Add Custom Facet</button>
+        </div>
+
+        <!-- Add Facet Inline Panel -->
+        <div id="add-facet-panel" class="new-facet-form" style="display: none;">
+          <div style="display: grid; grid-template-columns: 1.5fr 2fr 1fr 1fr; gap: 0.5rem; margin-bottom: 0.5rem;">
+            <input type="text" id="new-facet-id" placeholder="id (e.g. warranty_support)">
+            <input type="text" id="new-facet-name" placeholder="Name (e.g. Warranty & Support)">
+            <select id="new-facet-type">
+              <option value="text">text</option>
+              <option value="currency">currency</option>
+              <option value="unit_number">unit_number</option>
+              <option value="percentage">percentage</option>
+              <option value="date">date</option>
+              <option value="list">list</option>
+            </select>
+            <select id="new-facet-importance">
+              <option value="critical">Critical</option>
+              <option value="high" selected>High</option>
+              <option value="medium">Medium</option>
+            </select>
+          </div>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <input type="text" id="new-facet-consequence" placeholder="One-line real-world consequence if missing or contradictory..." style="flex: 1;">
+            <label style="display: flex; align-items: center; gap: 0.35rem; font-size: 0.78rem; text-transform: none; color: #cbd5e1; cursor: pointer;">
+              <input type="checkbox" id="new-facet-deadline"> Is Deadline / Expiry
+            </label>
+            <button id="btn-save-new-facet" class="btn btn-primary btn-small" type="button">Save</button>
+            <button id="btn-cancel-new-facet" class="btn btn-ghost btn-small" type="button">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Facets Grid Cards -->
+        <div id="facets-list" class="facets-card-grid">
+          <!-- Rendered dynamically as rich editable facet cards -->
+        </div>
+      </div>
+
+      <div class="setup-actions">
+        <button id="btn-init-session" class="btn btn-primary">Initialize Research Session</button>
+        <button id="btn-load-sample-all" class="btn btn-outline">🚀 1-Click Demo (Load Synthetic Sources)</button>
+      </div>
+    </section>
+
+    <!-- Step 2: Source Ingestion & Review -->
+    <section class="card sources-section" id="sources-section" style="display: none;">
+      <div class="section-header">
+        <div class="step-num">2</div>
+        <div class="header-content-between">
+          <div>
+            <h2>Source Review & Ingestion</h2>
+            <p class="subtitle">Add web pages or paste text circulars. Each source is hashed, classified, and date-proven.</p>
+          </div>
+          <button id="btn-open-add-source" class="btn btn-secondary">+ Add Custom Source</button>
+        </div>
+      </div>
+
+      <!-- Add Source Form (Collapsible) -->
+      <div id="add-source-box" class="source-input-panel" style="display: none;">
+        <div class="tab-buttons">
+          <button class="tab-btn active" data-tab="tab-url">Fetch Web URL</button>
+          <button class="tab-btn" data-tab="tab-paste">Paste Text / Circular</button>
+        </div>
+
+        <div id="tab-url" class="tab-content active">
+          <div class="form-group">
+            <label for="source-url-input">Web URL</label>
+            <input type="url" id="source-url-input" placeholder="https://example.gov.in/scheme-guidelines.html">
+          </div>
+        </div>
+
+        <div id="tab-paste" class="tab-content">
+          <div class="form-group">
+            <label for="source-title-input">Document Title</label>
+            <input type="text" id="source-title-input" placeholder="e.g. Official Notification PDF text">
+          </div>
+          <div class="form-group">
+            <label for="source-paste-input">Paste Text Content</label>
+            <textarea id="source-paste-input" rows="5" placeholder="Paste circular or article text here..."></textarea>
+          </div>
+        </div>
+
+        <div class="panel-actions">
+          <button id="btn-submit-source" class="btn btn-primary">Ingest Source</button>
+          <button id="btn-cancel-source" class="btn btn-ghost">Cancel</button>
+        </div>
+      </div>
+
+      <!-- Sources List Cards -->
+      <div id="sources-grid" class="sources-grid">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Action Bar -->
+      <div class="extract-action-bar">
+        <div class="extract-meta">
+          <span id="sources-count-badge" class="counter-badge">0 Sources Ingested</span>
+          <span id="source-independence-badge" class="badge badge-independence" style="display: none;">3 sources, 1 original</span>
+          <span class="subtext">All facets will be extracted in one pass per source and verified via deterministic code.</span>
+        </div>
+        <button id="btn-run-extraction" class="btn btn-accent btn-large">
+          <span class="btn-icon">⚡</span> Extract & Verify Claims (L1 Core)
+        </button>
+      </div>
+    </section>
+
+    <!-- Step 3: Verification Findings & Results -->
+    <section class="card results-section" id="results-section" style="display: none;">
+      <div class="section-header">
+        <div class="step-num">3</div>
+        <div class="header-content-between">
+          <div>
+            <h2>Claim Verification Findings</h2>
+            <p class="subtitle" id="based-on-sources-text">Based only on the sources provided.</p>
+          </div>
+          <div class="results-stats">
+            <div class="stat-pill stat-independence" id="pill-independence" style="display: none;">
+              <span class="stat-num" id="stat-independence-num" style="font-size: 0.95rem;">-</span>
+              <span class="stat-label">Source Independence</span>
+            </div>
+            <div class="stat-pill stat-redteam" id="pill-redteam" style="display: none;">
+              <span class="stat-num" id="stat-redteam-counter" style="font-size: 0.88rem; color: #38bdf8;">-</span>
+              <span class="stat-label">Red-Team Audit</span>
+            </div>
+            <div class="stat-pill stat-verified">
+              <span class="stat-num" id="stat-verified-count">0</span>
+              <span class="stat-label">Sourced & Verified</span>
+            </div>
+            <div class="stat-pill stat-rejected">
+              <span class="stat-num" id="stat-rejected-count">0</span>
+              <span class="stat-label">Rejected / Unverified</span>
+            </div>
+            <div class="export-actions" style="display: flex; gap: 0.4rem; align-items: center; margin-left: 0.5rem;">
+              <button id="btn-export-json" class="btn btn-secondary btn-small" onclick="exportAuditTrailJson()" title="Download structured audit trail JSON">📥 JSON</button>
+              <button id="btn-export-html" class="btn btn-outline btn-small" onclick="exportAuditTrailHtml()" title="Open printable audit trail report">🖨️ Report</button>
+            </div>
+          </div>
+      </div>
+
+      <!-- Assumed Version/Period & User Override Bar -->
+      <div class="cycle-banner-bar">
+        <div class="cycle-banner-left">
+          <span style="font-size: 1.25rem;">📅</span>
+          <div>
+            <div style="display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;">
+              <span style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim);">Version / Period:</span>
+              <strong id="display-current-cycle" style="color: #38bdf8; font-size: 1rem; font-family: var(--font-mono);">Auto-detecting...</strong>
+              <span id="cycle-mode-pill" class="badge badge-low">Assumed from newest source</span>
+            </div>
+            <p id="cycle-banner-desc" style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.2rem;">Inferred dynamically from newest official source. You can override it to the right.</p>
+          </div>
+        </div>
+        <div class="cycle-banner-right">
+          <label for="input-override-cycle" style="font-size: 0.78rem; font-weight: 600; color: var(--text-muted);">Override:</label>
+          <input type="text" id="input-override-cycle" placeholder="e.g. 2025, Fall 2025, Gen 7" class="cycle-override-input">
+          <button id="btn-apply-cycle-override" class="btn btn-secondary btn-small" onclick="applyCycleOverride()">Apply</button>
+          <button id="btn-reset-cycle-override" class="btn btn-outline btn-small" onclick="resetCycleOverride()" title="Reset to auto-detect">Reset</button>
+        </div>
+      </div>
+
+      <!-- Verification & Gap Tabs -->
+      <div class="verification-tabs">
+        <button class="vtab-btn active" id="tab-btn-sourced" onclick="switchResultsTab('sourced')">
+          <span class="dot-green"></span> SOURCED PROOFS (<span id="count-sourced-tab">0</span>)
+        </button>
+        <button class="vtab-btn" id="tab-btn-matrix" onclick="switchResultsTab('matrix')">
+          <span class="dot-cyan"></span> COVERAGE MATRIX (<span id="count-matrix-coverage">0%</span>)
+        </button>
+        <button class="vtab-btn" id="tab-btn-gaps" onclick="switchResultsTab('gaps')">
+          <span class="dot-amber"></span> GAP DETECTION (<span id="count-gaps-tab">0</span>)
+        </button>
+        <button class="vtab-btn" id="tab-btn-checklist" onclick="switchResultsTab('checklist')">
+          <span class="dot-purple"></span> PRIORITIZED CHECKLIST (<span id="count-checklist-tab">0</span>)
+        </button>
+        <button class="vtab-btn" id="tab-btn-rejected" onclick="switchResultsTab('rejected')">
+          <span class="dot-red"></span> REJECTED (<span id="count-rejected-tab">0</span>)
+        </button>
+        <button class="vtab-btn" id="tab-btn-all" onclick="switchResultsTab('all')">
+          ALL CLAIMS
+        </button>
+      </div>
+
+      <!-- Claims View -->
+      <div id="claims-container" class="claims-list">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Coverage Matrix View (L3) -->
+      <div id="matrix-container" class="matrix-view" style="display: none;">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Gap Detection View -->
+      <div id="gaps-container" class="gaps-list" style="display: none;">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Prioritized Checklist View -->
+      <div id="checklist-container" class="checklist-view" style="display: none;">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+  </main>
+
+  <!-- Source Inspection & Highlight Modal -->
+  <div id="source-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div>
+          <span id="modal-authority-badge" class="badge">OFFICIAL</span>
+          <h3 id="modal-source-title">Source Document Evidence View</h3>
+          <p id="modal-source-url" class="modal-sub"></p>
+        </div>
+        <button class="btn-close" onclick="closeSourceModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-quote-box">
+          <div class="modal-quote-label">Matched Exact Quote Span:</div>
+          <div id="modal-exact-quote" class="modal-quote-text"></div>
+        </div>
+        <div class="modal-document-viewer">
+          <div class="doc-meta-bar">
+            <span>Raw Document Text</span>
+            <span id="modal-match-score">Match: 100% exact</span>
+          </div>
+          <div id="modal-doc-text" class="doc-text-content"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Email Draft / Inquiry Modal -->
+  <div id="email-draft-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog" style="max-width: 650px;">
+      <div class="modal-header">
+        <div>
+          <span class="badge" style="background:#0284c7; color:#fff;">OFFICIAL INQUIRY</span>
+          <h3 id="modal-email-title">Draft Query to Official Body</h3>
+          <p id="modal-email-recipient" class="modal-sub"></p>
+        </div>
+        <button class="btn-close" onclick="closeEmailModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group" style="margin-bottom: 0.8rem;">
+          <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Subject Line</label>
+          <input type="text" id="modal-email-subject" readonly style="width: 100%; background: #0f172a; color: #f8fafc; border: 1px solid #334155; padding: 0.5rem; border-radius: 4px; font-size: 0.85rem;">
+        </div>
+        <div class="form-group">
+          <label style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Draft Message</label>
+          <textarea id="modal-email-body" rows="9" readonly style="width: 100%; background: #0f172a; color: #f8fafc; border: 1px solid #334155; padding: 0.6rem; border-radius: 4px; font-family: var(--font-mono); font-size: 0.82rem; line-height: 1.4; resize: vertical;"></textarea>
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+          <button id="btn-copy-email" class="btn btn-primary btn-small" onclick="copyEmailDraft()">📋 Copy Email</button>
+          <button class="btn btn-ghost btn-small" onclick="closeEmailModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <p>Digital Dark Spot • Deterministic Evidence Engine • Hackathon Build L1</p>
+      <p class="footer-muted">Code-verified quotes, rapidfuzz alignment & exact digit checking.</p>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
