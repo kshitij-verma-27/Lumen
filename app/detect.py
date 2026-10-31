@@ -363,7 +363,7 @@ def run_gap_detection(session_id: str) -> Dict[str, Any]:
     if user_vp:
         current_version_period = normalize_version_period(user_vp)
         if not newest_source_vp or newest_source_vp < current_version_period:
-            version_period_warning = f"No source covers the current version/period ({current_version_period}). The newest version/period found across sources is '{newest_source_vp or 'none'}'."
+            version_period_warning = f"No source covers the current cycle ({current_version_period}). The newest version/period found across sources is '{newest_source_vp or 'none'}'."
     else:
         if newest_source_vp:
             current_version_period = newest_source_vp
@@ -374,7 +374,7 @@ def run_gap_detection(session_id: str) -> Dict[str, Any]:
 
     # Check if the version/period the user asked about is already over relative to today's date
     target_vp_to_check = user_vp or current_version_period
-    if not target_vp_to_check and sess.get("goal"):
+    if not target_vp_to_check and dict(sess).get("goal"):
         goal_term = re.search(r'\b(Fall|Autumn|Spring|Summer|Winter)\s+(20\d\d)\b', sess["goal"], re.IGNORECASE)
         if goal_term:
             target_vp_to_check = f"{goal_term.group(1).capitalize()} {goal_term.group(2)}"

@@ -21,14 +21,25 @@ async def recheck_source(source_id: str, simulated_new_text: Optional[str] = Non
     """
     conn = get_db_connection()
     row = conn.execute("SELECT * FROM sources WHERE id = ?", (source_id,)).fetchone()
+    is_registry = False
     if not row:
-        conn.close()
-        raise ValueError(f"Source with id '{source_id}' not found.")
+        row = conn.execute("SELECT * FROM registry_sources WHERE id = ?", (source_id,)).fetchone()
+        if not row:
+            conn.close()
+            raise ValueError(f"Source with id '{source_id}' not found.")
+        is_registry = True
 
     src = row_to_dict(row)
-    old_text = src.get("text") or ""
-    old_hash = src.get("content_hash") or calculate_content_hash(old_text)
-    url = src.get("url") or ""
+    if is_registry:
+        old_text = src.get("notes") or src.get("name") or ""
+        old_hash = calculate_content_hash(old_text)
+        url = src.get("base_url") or ""
+        src["title"] = src.get("name")
+        src["url"] = url
+    else:
+        old_text = src.get("text") or ""
+        old_hash = src.get("content_hash") or calculate_content_hash(old_text)
+        url = src.get("url") or ""
 
     now_iso = datetime.now(timezone.utc).isoformat()
 
@@ -98,18 +109,32 @@ async def recheck_source(source_id: str, simulated_new_text: Optional[str] = Non
         summary = f"⚠️ Content modified: +{added_count} lines, -{removed_count} lines. (any text change counts, including small page edits)"
 
         # Update source in SQLite
-        conn.execute("""
-            UPDATE sources
-            SET text = ?, content_hash = ?, last_checked_at = ?
-            WHERE id = ?
-        """, (fresh_text, new_hash, now_iso, source_id))
+        if is_registry:
+            conn.execute("""
+                UPDATE registry_sources
+                SET last_checked = ?
+                WHERE id = ?
+            """, (now_iso, source_id))
+        else:
+            conn.execute("""
+                UPDATE sources
+                SET text = ?, content_hash = ?, last_checked_at = ?
+                WHERE id = ?
+            """, (fresh_text, new_hash, now_iso, source_id))
     else:
         summary = "✓ Content unchanged. Hash verified. (any text change counts, including small page edits)"
-        conn.execute("""
-            UPDATE sources
-            SET last_checked_at = ?
-            WHERE id = ?
-        """, (now_iso, source_id))
+        if is_registry:
+            conn.execute("""
+                UPDATE registry_sources
+                SET last_checked = ?
+                WHERE id = ?
+            """, (now_iso, source_id))
+        else:
+            conn.execute("""
+                UPDATE sources
+                SET last_checked_at = ?
+                WHERE id = ?
+            """, (now_iso, source_id))
 
     conn.commit()
     conn.close()

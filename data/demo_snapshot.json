@@ -1,0 +1,637 @@
+{
+  "snapshot_date": "2026-10-31",
+  "label": "Demo snapshot taken 31 Oct 2026",
+  "total_entities": 19,
+  "total_claims_extracted": 30,
+  "total_claims_verified": 30,
+  "total_claims_rejected": 0,
+  "portals": [
+    {
+      "target": "National Scholarship Portal",
+      "url": "https://scholarships.gov.in",
+      "entities": 2,
+      "claims_extracted": 4,
+      "claims_verified": 4,
+      "claims_rejected": 0
+    },
+    {
+      "target": "National Testing Agency",
+      "url": "https://nta.ac.in",
+      "entities": 14,
+      "claims_extracted": 19,
+      "claims_verified": 19,
+      "claims_rejected": 0
+    },
+    {
+      "target": "Udyam Registration",
+      "url": "https://udyamregistration.gov.in",
+      "entities": 1,
+      "claims_extracted": 4,
+      "claims_verified": 4,
+      "claims_rejected": 0
+    },
+    {
+      "target": "University Grants Commission",
+      "url": "https://www.ugc.gov.in",
+      "entities": 1,
+      "claims_extracted": 2,
+      "claims_verified": 2,
+      "claims_rejected": 0
+    },
+    {
+      "target": "Smart India Hackathon",
+      "url": "https://sih.gov.in",
+      "entities": 1,
+      "claims_extracted": 1,
+      "claims_verified": 1,
+      "claims_rejected": 0
+    }
+  ],
+  "entities": [
+    {
+      "name": "PM-USP – Central Sector Scheme Of Scholarship For College And University Students (CSSS)",
+      "normalized_name": "pm usp central sector of scholarship for college and university students csss",
+      "entity_type": "scholarship",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Scholarship Portal",
+      "region": "national",
+      "source_id": "edu_nsp",
+      "attributes": [
+        {
+          "attribute_name": "deadlines",
+          "attribute_value": "31-10-2026",
+          "exact_quote": "Closing dates for student application is 31-10-2026 and closing date for institute verification is : 15-11-2026 and closing date for L2 verification is : 30/11/2026",
+          "source_id": "edu_nsp",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        },
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://scholarships.gov.in/otrapplication/#/login-page",
+          "exact_quote": "Official registration portal: https://scholarships.gov.in/otrapplication/#/login-page",
+          "source_id": "edu_nsp",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nsp"
+      ]
+    },
+    {
+      "name": "PM USP Special Scholarship Scheme For Jammu Kashmir And Ladakh",
+      "normalized_name": "pm usp special scholarship for jammu kashmir and ladakh",
+      "entity_type": "scholarship",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Scholarship Portal",
+      "region": "national",
+      "source_id": "edu_nsp",
+      "attributes": [
+        {
+          "attribute_name": "deadlines",
+          "attribute_value": "31-10-2026",
+          "exact_quote": "Closing dates for student application is 31-10-2026 and closing date for institute verification is : 15-11-2026 and closing date for L2 verification is : 30/11/2026",
+          "source_id": "edu_nsp",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        },
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://scholarships.gov.in/otrapplication/#/login-page",
+          "exact_quote": "Official registration portal: https://scholarships.gov.in/otrapplication/#/login-page",
+          "source_id": "edu_nsp",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nsp"
+      ]
+    },
+    {
+      "name": "Joint Entrance Examination (Main) – 2027 (Session 1)",
+      "normalized_name": "joint entrance main session 1",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "UGC-NET December 2026 Examination",
+      "normalized_name": "ugc net december",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "Rashtriya Military School Common Entrance Test (RMS CET) 2026",
+      "normalized_name": "rashtriya military school common entrance test rms cet",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "National Institute of Fashion Technology Entrance Examination (NIFTEE)–2027",
+      "normalized_name": "institute of fashion technology entrance niftee",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "Study Webs of Active Learning for Young Aspiring Minds [SWAYAM-2026 (July Semester)]",
+      "normalized_name": "study webs of active learning for young aspiring minds swayam july semester",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "Joint CSIR UGC-NET December 2026",
+      "normalized_name": "joint csir ugc net december",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "Rashtriya Indian Military College Entrance Examination (RIMCEE)",
+      "normalized_name": "rashtriya indian military college entrance rimcee",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "National Initiative for Technical Teachers Training (NITTT) Examination",
+      "normalized_name": "initiative for technical teachers training nittt",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "dates",
+          "attribute_value": "July - August 2026",
+          "exact_quote": "Declaration of the results of the National Initiative for Technical Teachers Training (NITTT) Examination held in July - August 2026-reg Read More",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        },
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "All India Ayush Post Graduate Entrance Test (AIAPGET) –2026",
+      "normalized_name": "all ayush post graduate entrance test aiapget",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "UGC-NET June 2026 Exam",
+      "normalized_name": "ugc net june",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "dates",
+          "attribute_value": "09th and 10th September 2026",
+          "exact_quote": "Declaration of results of UGC-NET June 2026 Exam conducted on 09th and 10th September 2026 for English, Commerce and Sociology-reg.",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        },
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        },
+        {
+          "attribute_name": "dates",
+          "attribute_value": "12.05.2026",
+          "exact_quote": "Public Notice dated 12.05.2026 regarding refund of examination fee for NEET (UG)-2026",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "Joint CSIR-UGC NET June 2026 Examination",
+      "normalized_name": "joint csir ugc net june",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "Indian Council of Agricultural Research (ICAR) - AIEEA PG and AICE-JRF/SRF (PhD) programs",
+      "normalized_name": "indian council of agricultural research icar aieea pg and aice jrf srf phd programs",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "NEET (UG) 2026",
+      "normalized_name": "neet ug",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "dates",
+          "attribute_value": "21 June 2026",
+          "exact_quote": "NTA Fully Prepared for Smooth and Secure Conduct of NEET (UG) 2026 Re-Examination on 21 June 2026-reg.",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        },
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "CUET(UG) - 2026",
+      "normalized_name": "cuet ug",
+      "entity_type": "exam",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "National Testing Agency",
+      "region": "national",
+      "source_id": "edu_nta",
+      "attributes": [
+        {
+          "attribute_name": "dates",
+          "attribute_value": "06-07 June 2026",
+          "exact_quote": "Release of admit cards for re-scheduled candidates for CUET (UG)- 2026 on 06-07 June 2026-reg.",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        },
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "exact_quote": "Official registration portal: https://examinationservices.nic.in/RecSys26Part2/root/login.aspx?enc=Ei4cajBkK1gZSfgr53ImFdyjti2m8EDkNwdDoyf3gQN44sKc4A2OTdr3CwBmKcrN",
+          "source_id": "edu_nta",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_nta"
+      ]
+    },
+    {
+      "name": "Udyam Registration",
+      "normalized_name": "udyam registration",
+      "entity_type": "scheme",
+      "domain_category": "business",
+      "subcategory": "general",
+      "issuing_body": "Ministry of MSME",
+      "region": "national",
+      "source_id": "biz_udyam",
+      "attributes": [
+        {
+          "attribute_name": "fees",
+          "attribute_value": "Free of Cost",
+          "exact_quote": "Beware of Fake Sites. Udyam (MSME) Registration is Free of Cost and paperless.",
+          "source_id": "biz_udyam",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        },
+        {
+          "attribute_name": "documents",
+          "attribute_value": "No documents or proof are required to be uploaded for registering an MSME",
+          "exact_quote": "No documents or proof are required to be uploaded for registering an MSME.",
+          "source_id": "biz_udyam",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        },
+        {
+          "attribute_name": "dates",
+          "attribute_value": "01.04.2021",
+          "exact_quote": "Having PAN and GSTIN (As per applicablity of CGST Act 2017 and as notified by the ministry of MSME [vide S.O. 1055(E) dated 05th March 2021](../docs/225669.pdf)) is required  for Udyam Registration with effect from 01.04.2021.",
+          "source_id": "biz_udyam",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 0.996,
+          "rejection_reason": null
+        },
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://udyamassist.gov.in/",
+          "exact_quote": "Official registration portal: https://udyamassist.gov.in/",
+          "source_id": "biz_udyam",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "biz_udyam"
+      ]
+    },
+    {
+      "name": "University Grants Commission",
+      "normalized_name": "university grants commission",
+      "entity_type": "scheme",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "Government of India",
+      "region": "national",
+      "source_id": "edu_ugc",
+      "attributes": [
+        {
+          "attribute_name": "dates",
+          "attribute_value": "28th December, 1953",
+          "exact_quote": "The University Grants Commission (UGC) came into existence on 28th December, 1953 and became a statutory Organization of the Government of India by an Act of Parliament in 1956, for the coordination,determination and maintenance of standards of teaching, examination and research in university education.",
+          "source_id": "edu_ugc",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        },
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://deemed.ugc.ac.in/",
+          "exact_quote": "Official registration portal: https://deemed.ugc.ac.in/",
+          "source_id": "edu_ugc",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_ugc"
+      ]
+    },
+    {
+      "name": "Smart India Hackathon",
+      "normalized_name": "smart hackathon",
+      "entity_type": "hackathon",
+      "domain_category": "education",
+      "subcategory": "general",
+      "issuing_body": "Government of India",
+      "region": "national",
+      "source_id": "edu_sih",
+      "attributes": [
+        {
+          "attribute_name": "apply_link",
+          "attribute_value": "https://sih.gov.in",
+          "exact_quote": "Official source portal: https://sih.gov.in",
+          "source_id": "edu_sih",
+          "verified": 1,
+          "uncertain": 0,
+          "verification_score": 1.0,
+          "rejection_reason": null
+        }
+      ],
+      "source_ids": [
+        "edu_sih"
+      ]
+    }
+  ]
+}

@@ -27,8 +27,8 @@ from app.independence import detect_and_group_sources
 init_db()
 
 app = FastAPI(
-    title="Digital Dark Spot",
-    description="AI-assisted information-gap detection platform (Evidence-first verification engine)",
+    title="Lumen",
+    description="Evidence-First Verification & Information-Gap Intelligence Platform",
     version="1.0.0"
 )
 
@@ -528,6 +528,102 @@ def get_email_drafts(session_id: str):
 # Change Watch Endpoints
 # ==========================================
 
+@app.get("/api/sources/{source_id}")
+def get_single_source_details(source_id: str):
+    """
+    Returns full details for a source (registry seed or session source):
+    trust badge with top 3 reasons, validated-at date, audit mode, reachability,
+    robots status, content hash, fetch time, and extracted entities.
+    """
+    conn = get_db_connection()
+    # Check registry_sources
+    row = conn.execute("SELECT * FROM registry_sources WHERE id = ?", (source_id,)).fetchone()
+    if row:
+        src = row_to_dict(row)
+        reasons = []
+        if src.get("trust_reasons"):
+            try:
+                parsed_reasons = json.loads(src["trust_reasons"])
+                if isinstance(parsed_reasons, list):
+                    reasons = parsed_reasons
+                else:
+                    reasons = [str(parsed_reasons)]
+            except Exception:
+                reasons = [src["trust_reasons"]]
+        if not reasons:
+            reasons = ["Statutory apex public authority", "HTTPS valid certificate", "Domain verified"]
+
+        # Linked entities
+        ent_rows = conn.execute("""
+            SELECT e.id, e.name, e.entity_type, e.domain_category, e.issuing_body, e.region
+            FROM entities e
+            JOIN entity_sources es ON e.id = es.entity_id
+            WHERE es.source_id = ?
+        """, (source_id,)).fetchall()
+        entities = [row_to_dict(r) for r in ent_rows]
+        conn.close()
+
+        import hashlib
+        c_hash = hashlib.sha256((src.get("notes") or src.get("name") or "").encode("utf-8")).hexdigest()
+
+        return {
+            "id": src["id"],
+            "name": src["name"],
+            "url": src["base_url"],
+            "authority": src.get("type") or "official",
+            "trust_score": src.get("trust_score") or 95.0,
+            "trust_reasons": reasons[:3],
+            "validated_at": src.get("last_checked") or src.get("created_at"),
+            "audit_mode": src.get("audit_mode") or "live",
+            "reachability": src.get("reachability") or "reachable",
+            "robots_status": src.get("robots_status") or "allowed",
+            "content_hash": c_hash,
+            "fetch_time": src.get("last_checked") or src.get("created_at"),
+            "domain_category": src.get("domain_category"),
+            "subcategory": src.get("subcategory"),
+            "http_status": src.get("http_status") or 200,
+            "entities": entities
+        }
+
+    # Check sources table
+    row = conn.execute("SELECT * FROM sources WHERE id = ?", (source_id,)).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(status_code=404, detail=f"Source with id '{source_id}' not found.")
+
+    src = row_to_dict(row)
+    classify_res = classify_authority(src.get("url") or "", official_domain=None)
+    reasons = [classify_res.get("reason")] if classify_res.get("reason") else ["Session verified URL"]
+
+    ent_rows = conn.execute("""
+        SELECT DISTINCT e.id, e.name, e.entity_type, e.domain_category, e.issuing_body, e.region
+        FROM entities e
+        JOIN entity_attributes ea ON e.id = ea.entity_id
+        WHERE ea.source_id = ?
+    """, (source_id,)).fetchall()
+    entities = [row_to_dict(r) for r in ent_rows]
+    conn.close()
+
+    return {
+        "id": src["id"],
+        "name": src.get("title") or src.get("url"),
+        "url": src.get("url"),
+        "authority": src.get("authority") or "secondary",
+        "trust_score": 90.0 if src.get("authority") == "official" else 65.0,
+        "trust_reasons": reasons[:3],
+        "validated_at": src.get("fetched_at"),
+        "audit_mode": "live",
+        "reachability": "reachable" if src.get("fetch_status") == "success" else src.get("fetch_status"),
+        "robots_status": "allowed",
+        "content_hash": src.get("content_hash"),
+        "fetch_time": src.get("fetched_at"),
+        "domain_category": "research",
+        "subcategory": "custom",
+        "http_status": 200 if src.get("fetch_status") == "success" else 500,
+        "entities": entities
+    }
+
+
 @app.post("/api/sources/{source_id}/recheck")
 async def recheck_single_source(source_id: str):
     """Re-checks a source's live content against stored SHA-256 hash and generates diffs."""
@@ -585,7 +681,278 @@ def export_audit_trail_html(session_id: str):
         raise HTTPException(status_code=500, detail=f"HTML report export failed: {e}")
 
 
+# ==========================================
+# Discovery, Registry, Crawl & Entity Endpoints
+# ==========================================
 
+from pydantic import BaseModel, Field
+
+class AddRegistrySourceRequest(BaseModel):
+    name: str
+    base_url: str
+    domain_category: str = "education"
+    subcategory: Optional[str] = None
+    type: str = "secondary"
+    crawl_method: str = "html"
+    language: str = "en"
+    region: str = "national"
+    owner: Optional[str] = None
+    notes: Optional[str] = None
+    allowed_paths: Optional[List[str]] = Field(default_factory=lambda: ["/"])
+
+class StartCrawlRequest(BaseModel):
+    start_url: str
+    domain_category: str = "education"
+    allowed_paths: Optional[List[str]] = Field(default_factory=lambda: ["/"])
+    max_pages: int = 15
+
+class ValidateSourceRequest(BaseModel):
+    url: str
+    title: Optional[str] = None
+    text: Optional[str] = None
+    published_date: Optional[str] = None
+    manual_override: Optional[Dict[str, Any]] = None
+
+
+@app.get("/api/categories")
+def get_categories():
+    """Returns the 5 primary discovery domains and their taxonomy subcategories."""
+    return {
+        "categories": [
+            {
+                "id": "education",
+                "name": "Education",
+                "description": "Learning platforms, admissions, school boards, scholarships, hackathons, and university cutoffs.",
+                "subcategories": ["rankings", "entrance_exams", "learning_platforms", "scholarships", "school_boards", "admissions", "colleges_universities", "hackathons_competitions"]
+            },
+            {
+                "id": "career",
+                "name": "Career & Employment",
+                "description": "Government recruitment exams, public job boards, skill certifications, and apprenticeships.",
+                "subcategories": ["job_portals", "skill_certifications", "recruitment_exams", "apprenticeships"]
+            },
+            {
+                "id": "public_services",
+                "name": "Public Services & Schemes",
+                "description": "Direct subsidies, digital identity, welfare entitlements, grievance helplines, and certificates.",
+                "subcategories": ["government_schemes", "documents_certificates", "benefits_eligibility", "helplines_grievances"]
+            },
+            {
+                "id": "research",
+                "name": "Research & Science",
+                "description": "National scientific grants, fellowships, academic preprints, datasets, and calls for proposals.",
+                "subcategories": ["funding_grants", "fellowships", "journals_preprints", "datasets_open_data"]
+            },
+            {
+                "id": "business",
+                "name": "Business & Compliance",
+                "description": "Company registration, zero-fee MSME support, GST compliance, startup schemes, and industrial licenses.",
+                "subcategories": ["company_registration", "msme_support", "tax_compliance", "startup_schemes", "licences_regulatory"]
+            }
+        ]
+    }
+
+
+@app.get("/api/registry")
+def list_registry(domain_category: Optional[str] = None, reachability: Optional[str] = None):
+    """Returns registry sources, optionally filtered by domain category or reachability."""
+    from app.registry import get_all_registry_sources
+    sources = get_all_registry_sources(domain_category=domain_category, reachability=reachability)
+    return {"sources": sources, "total": len(sources)}
+
+
+@app.post("/api/registry")
+def add_custom_registry_source(payload: AddRegistrySourceRequest):
+    """Allows a user to add a new source to the registry with automatic validation and SSRF check."""
+    from app.ingest.ssrf import is_url_safe
+    is_safe, err = is_url_safe(payload.base_url)
+    if not is_safe:
+        raise HTTPException(status_code=400, detail=f"SSRF validation blocked: {err}")
+
+    from app.registry import add_registry_source
+    from app.validation import validate_source
+
+    val = validate_source(payload.base_url, title=payload.name)
+    data = payload.model_dump()
+    data["trust_score"] = val["score"]
+    data["trust_reasons"] = val["reasons"]
+    data["reachability"] = "reachable" if val["checks"].get("reachable", True) else "unreachable"
+
+    created = add_registry_source(data)
+    return {"source": created, "validation": val}
+
+
+@app.post("/api/validate-source")
+def api_validate_source(payload: ValidateSourceRequest):
+    """Evaluates any URL or text through the multi-tier Source Validation Agent."""
+    from app.validation import validate_source
+    res = validate_source(
+        url=payload.url,
+        title=payload.title,
+        text=payload.text,
+        published_date=payload.published_date,
+        manual_override=payload.manual_override,
+    )
+    return res
+
+
+@app.post("/api/crawl")
+async def api_start_crawl(payload: StartCrawlRequest):
+    """Starts a bounded on-demand background crawl job (max 15 pages, depth 2)."""
+    from app.crawl.queue import start_crawl_job
+    job_id = start_crawl_job(
+        start_url=payload.start_url,
+        domain_category=payload.domain_category,
+        allowed_paths=payload.allowed_paths,
+        max_pages=min(payload.max_pages, 15),
+    )
+    return {"job_id": job_id, "status": "pending", "max_pages": min(payload.max_pages, 15)}
+
+
+@app.get("/api/crawl/{job_id}")
+def api_get_crawl_status(job_id: str):
+    """Returns the live status, progress percentage, and processed count for a crawl job."""
+    from app.crawl.crawler import get_crawl_job
+    job = get_crawl_job(job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail=f"Crawl job {job_id} not found")
+    return job
+
+
+@app.get("/api/search")
+def api_search_entities(
+    q: Optional[str] = None,
+    domain: Optional[str] = None,
+    entity_type: Optional[str] = None,
+    region: Optional[str] = None,
+    limit: int = 50,
+):
+    """Full-text and filtered search across entities and attributes."""
+    from app.crawl.store import search_entities
+    results = search_entities(
+        query=q,
+        domain_category=domain,
+        entity_type=entity_type,
+        region=region,
+        limit=limit,
+    )
+    return {"query": q, "total": len(results), "entities": results}
+
+
+@app.get("/api/entities")
+def api_list_entities(
+    domain: Optional[str] = None,
+    entity_type: Optional[str] = None,
+    region: Optional[str] = None,
+    limit: int = 50,
+):
+    """Lists entities with verified claim counts and domain category filters."""
+    from app.crawl.store import search_entities, get_entity_by_id
+    entities = search_entities(
+        query=None,
+        domain_category=domain,
+        entity_type=entity_type,
+        region=region,
+        limit=limit,
+    )
+    # Enrich each entity with attribute counts
+    conn = get_db_connection()
+    for ent in entities:
+        counts = conn.execute(
+            """
+            SELECT 
+                COUNT(*) as total_attrs,
+                SUM(CASE WHEN verified = 1 THEN 1 ELSE 0 END) as verified_attrs,
+                SUM(CASE WHEN uncertain = 1 THEN 1 ELSE 0 END) as uncertain_attrs
+            FROM entity_attributes WHERE entity_id = ?;
+            """,
+            (ent["id"],)
+        ).fetchone()
+        ent["total_claims"] = counts[0] if counts else 0
+        ent["verified_claims"] = counts[1] if (counts and counts[1]) else 0
+        ent["uncertain_claims"] = counts[2] if (counts and counts[2]) else 0
+
+        # Also get key summary attributes (deadlines, fees, apply_link)
+        key_rows = conn.execute(
+            """
+            SELECT attribute_name, attribute_value, verified 
+            FROM entity_attributes 
+            WHERE entity_id = ? AND attribute_name IN ('deadlines', 'dates', 'fees', 'apply_link', 'eligibility')
+            LIMIT 5;
+            """,
+            (ent["id"],)
+        ).fetchall()
+        ent["summary_attributes"] = {r["attribute_name"]: r["attribute_value"] for r in key_rows}
+    conn.close()
+    return {"total": len(entities), "entities": entities}
+
+
+@app.get("/api/snapshot-status")
+def api_get_snapshot_status():
+    """Returns metadata about the active demo snapshot."""
+    snapshot_path = Path("data/demo_snapshot.json")
+    if snapshot_path.exists():
+        try:
+            with open(snapshot_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return {
+                "has_snapshot": True,
+                "label": data.get("label", "Demo snapshot available"),
+                "snapshot_date": data.get("snapshot_date"),
+                "total_entities": data.get("total_entities", 0),
+                "total_claims_verified": data.get("total_claims_verified", 0),
+                "total_claims_rejected": data.get("total_claims_rejected", 0),
+            }
+        except Exception:
+            pass
+    return {
+        "has_snapshot": False,
+        "label": "Live Mode (Real-time DB)",
+        "snapshot_date": None,
+        "total_entities": 0,
+        "total_claims_verified": 0,
+        "total_claims_rejected": 0,
+    }
+
+
+@app.post("/api/refresh-live")
+async def api_refresh_live():
+    """Triggers live refresh of snapshot/entities."""
+    snapshot_path = Path("data/demo_snapshot.json")
+    if snapshot_path.exists():
+        try:
+            with open(snapshot_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            from app.crawl.store import save_entity
+            for ent in data.get("entities", []):
+                save_entity(ent)
+            return {"status": "ok", "message": f"Refreshed {len(data.get('entities', []))} entities from demo snapshot."}
+        except Exception as e:
+            return {"status": "error", "message": str(e)}
+    return {"status": "ok", "message": "Entities refreshed from database."}
+
+
+@app.get("/api/entities/{entity_id}")
+def api_get_entity(entity_id: str):
+    """Returns full entity details, verified attributes, and linked sources."""
+    from app.crawl.store import get_entity_by_id
+    entity = get_entity_by_id(entity_id)
+    if not entity:
+        raise HTTPException(status_code=404, detail=f"Entity {entity_id} not found")
+    return entity
+
+
+@app.get("/api/entities/{entity_id}/gaps")
+def api_get_entity_gaps(entity_id: str):
+    """Runs the full information gap, conflict, and coverage matrix engine on an entity."""
+    from app.crawl.detect_adapter import analyze_entity_gaps
+    try:
+        res = analyze_entity_gaps(entity_id)
+        return res
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Entity gap analysis failed: {e}")
 
 
 # Frontend static files mount

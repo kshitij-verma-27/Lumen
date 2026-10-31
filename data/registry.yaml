@@ -1,0 +1,498 @@
+sources:
+  # EDUCATION
+  - id: edu_nirf
+    name: National Institutional Ranking Framework (NIRF)
+    domain_category: education
+    subcategory: rankings
+    base_url: https://www.nirfindia.org
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 95
+    trust_reasons: ["Ministry of Education official ranking authority", "Recognized apex institutional ranker", "HTTPS valid"]
+    language: en
+    region: national
+    owner: Ministry of Education, Government of India
+    notes: Official ranking portal for Indian higher education institutions.
+
+  - id: edu_nta
+    name: National Testing Agency (NTA)
+    domain_category: education
+    subcategory: entrance_exams
+    base_url: https://nta.ac.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 95
+    trust_reasons: ["Statutory testing body under Ministry of Education", "Official entrance examination conduct authority", "Academic domain (.ac.in)"]
+    language: en
+    region: national
+    owner: National Testing Agency
+    notes: Conducts JEE, NEET, CUET, UGC-NET and national entrance exams.
+
+  - id: edu_swayam
+    name: SWAYAM Online Courses
+    domain_category: education
+    subcategory: learning_platforms
+    base_url: https://swayam.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 95
+    trust_reasons: ["Government of India MOOC initiative", "Apex official education portal (.gov.in)", "Credit transfer eligible"]
+    language: en
+    region: national
+    owner: Ministry of Education, Government of India
+    notes: Free online courses from school to post-graduate level.
+
+  - id: edu_nptel
+    name: NPTEL
+    domain_category: education
+    subcategory: learning_platforms
+    base_url: https://nptel.ac.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 92
+    trust_reasons: ["Joint initiative of IITs and IISc", "Official technical curriculum portal", "Academic domain (.ac.in)"]
+    language: en
+    region: national
+    owner: IIT Madras / Consortium of IITs
+    notes: Premier video lecture and certification portal for engineering and sciences.
+
+  - id: edu_ncert
+    name: NCERT
+    domain_category: education
+    subcategory: school_boards
+    base_url: https://ncert.nic.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 95
+    trust_reasons: ["Apex national school curriculum authority", "National Informatics Centre hosted (.nic.in)", "Official textbooks and syllabus"]
+    language: en
+    region: national
+    owner: National Council of Educational Research and Training
+    notes: National curriculum, textbooks, and teacher resources.
+
+  - id: edu_aicte
+    name: AICTE India
+    domain_category: education
+    subcategory: admissions
+    base_url: https://www.aicte-india.org
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 94
+    trust_reasons: ["Statutory council for technical education", "Approval authority for engineering/management colleges", "Government regulated"]
+    language: en
+    region: national
+    owner: All India Council for Technical Education
+    notes: Technical institute approvals, scholarships, and model curricula.
+
+  - id: edu_ugc
+    name: University Grants Commission (UGC)
+    domain_category: education
+    subcategory: colleges_universities
+    base_url: https://www.ugc.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 95
+    trust_reasons: ["Statutory university coordination body", "Apex official education portal (.gov.in)", "Lists recognized/fake universities"]
+    language: en
+    region: national
+    owner: University Grants Commission
+    notes: University recognition, regulations, and research grant notifications.
+
+  - id: edu_nsp
+    name: National Scholarship Portal (NSP)
+    domain_category: education
+    subcategory: scholarships
+    base_url: https://scholarships.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 98
+    trust_reasons: ["Unified official scholarship window", "Apex official government domain (.gov.in)", "Direct Benefit Transfer integration"]
+    language: en
+    region: national
+    owner: Ministry of Electronics and Information Technology
+    notes: Central, state, and UGC scholarship schemes and timelines.
+
+  - id: edu_sih
+    name: Smart India Hackathon (SIH)
+    domain_category: education
+    subcategory: hackathons_competitions
+    base_url: https://sih.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 92
+    trust_reasons: ["Ministry of Education Innovation Cell initiative", "National student hackathon platform (.gov.in)", "Direct government problem statements"]
+    language: en
+    region: national
+    owner: MoE Innovation Cell / AICTE
+    notes: World's largest open innovation initiative for students.
+
+  - id: edu_diksha
+    name: DIKSHA National Teachers Platform
+    domain_category: education
+    subcategory: learning_platforms
+    base_url: https://diksha.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 94
+    trust_reasons: ["National digital infrastructure for school education", "Ministry of Education official portal (.gov.in)", "Multi-language QR textbook linkage"]
+    language: en
+    region: national
+    owner: Ministry of Education, Government of India
+    notes: Digital textbooks, audio-visual lessons, and teacher training.
+
+  # CAREER
+  - id: car_ncs
+    name: National Career Service (NCS)
+    domain_category: career
+    subcategory: job_portals
+    base_url: https://www.ncs.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 96
+    trust_reasons: ["Ministry of Labour and Employment official platform", "Apex official government domain (.gov.in)", "Verified job and career counselor registry"]
+    language: en
+    region: national
+    owner: Ministry of Labour and Employment
+    notes: Public employment service portal, job fairs, and apprenticeship matches.
+
+  - id: car_skill_india
+    name: Skill India Digital
+    domain_category: career
+    subcategory: skill_certifications
+    base_url: https://www.skillindiadigital.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 94
+    trust_reasons: ["Ministry of Skill Development & Entrepreneurship", "Official digital skilling infrastructure (.gov.in)", "PMKVY course certification"]
+    language: en
+    region: national
+    owner: National Skill Development Corporation / MSDE
+    notes: Skilling courses, PMKVY certifications, and apprenticeship search.
+
+  - id: car_upsc
+    name: Union Public Service Commission (UPSC)
+    domain_category: career
+    subcategory: recruitment_exams
+    base_url: https://upsc.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 98
+    trust_reasons: ["Constitutional recruitment authority", "Apex official government portal (.gov.in)", "Civil services and defence exam conduct"]
+    language: en
+    region: national
+    owner: Union Public Service Commission
+    notes: Civil Services, NDA, CDS, and central government recruitment notices.
+
+  - id: car_ssc
+    name: Staff Selection Commission (SSC)
+    domain_category: career
+    subcategory: recruitment_exams
+    base_url: https://ssc.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 96
+    trust_reasons: ["Central staff recruitment agency", "Official government domain (.gov.in)", "CGL, CHSL, MTS notifications"]
+    language: en
+    region: national
+    owner: Staff Selection Commission
+    notes: Recruitment notifications for subordinate and Group B/C civil posts.
+
+  # PUBLIC SERVICES
+  - id: pub_india_gov
+    name: National Portal of India
+    domain_category: public_services
+    subcategory: government_schemes
+    base_url: https://www.india.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 98
+    trust_reasons: ["Single window access to information and services", "Flagship national government portal (.gov.in)", "National Informatics Centre certified"]
+    language: en
+    region: national
+    owner: National Informatics Centre, MeitY
+    notes: Central repository for citizen services, schemes, and application forms.
+
+  - id: pub_mygov
+    name: MyGov Citizen Engagement
+    domain_category: public_services
+    subcategory: helplines_grievances
+    base_url: https://www.mygov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 95
+    trust_reasons: ["Citizen engagement platform of Government of India", "Official government domain (.gov.in)", "Authentic scheme updates and feedback"]
+    language: en
+    region: national
+    owner: MyGov, Ministry of Electronics and IT
+    notes: Citizen consultations, quizzes, and policy awareness.
+
+  - id: pub_digilocker
+    name: DigiLocker
+    domain_category: public_services
+    subcategory: documents_certificates
+    base_url: https://www.digilocker.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 98
+    trust_reasons: ["Digital India flagship initiative", "Legally recognized under IT Rules (.gov.in)", "Direct issuer digital document verification"]
+    language: en
+    region: national
+    owner: National e-Governance Division, MeitY
+    notes: Digital issuance and storage of marks, Aadhaar, driving licences.
+
+  - id: pub_umang
+    name: UMANG Unified Mobile App for New-age Governance
+    domain_category: public_services
+    subcategory: benefits_eligibility
+    base_url: https://web.umang.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 96
+    trust_reasons: ["Unified access point to central and state citizen services", "Official government domain (.gov.in)", "EPFO, utility, and pension tracking"]
+    language: en
+    region: national
+    owner: National e-Governance Division, MeitY
+    notes: Single mobile platform for hundreds of government services.
+
+  - id: pub_pmsuryaghar
+    name: PM Surya Ghar Muft Bijli Yojana
+    domain_category: public_services
+    subcategory: government_schemes
+    base_url: https://pmsuryaghar.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 95
+    trust_reasons: ["Direct national solar rooftop subsidy portal", "Official government domain (.gov.in)", "Subsidy calculator and vendor registry"]
+    language: en
+    region: national
+    owner: Ministry of New and Renewable Energy
+    notes: Rooftop solar registration, subsidy eligibility, and application tracking.
+
+  # RESEARCH
+  - id: res_anrf
+    name: Anusandhan National Research Foundation (ANRF)
+    domain_category: research
+    subcategory: funding_grants
+    base_url: https://anrfonline.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 94
+    trust_reasons: ["Statutory national research funding body", "Official online grant portal (.in)", "Successor to SERB research grants"]
+    language: en
+    region: national
+    owner: ANRF / Department of Science and Technology
+    notes: National research grant calls, fellowships, and scientific proposals.
+
+  - id: res_dst
+    name: Department of Science and Technology (DST)
+    domain_category: research
+    subcategory: funding_grants
+    base_url: https://dst.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 96
+    trust_reasons: ["Apex government scientific policy department", "Official government domain (.gov.in)", "National S&T calls and international partnerships"]
+    language: en
+    region: national
+    owner: Department of Science and Technology, MoST
+    notes: Scientific research grants, women scientist schemes (KIRAN), INSPIRE fellowships.
+
+  - id: res_csir_hrdg
+    name: CSIR Human Resource Development Group
+    domain_category: research
+    subcategory: fellowships
+    base_url: https://csirhrdg.res.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 94
+    trust_reasons: ["Apex research personnel development body", "Research domain (.res.in)", "NET JRF/SRF stipend disbursement rules"]
+    language: en
+    region: national
+    owner: Council of Scientific and Industrial Research
+    notes: CSIR NET results, JRF/SRF fellowship tenures, and grant approvals.
+
+  - id: res_arxiv
+    name: arXiv Open-Access Preprint Server
+    domain_category: research
+    subcategory: journals_preprints
+    base_url: https://arxiv.org
+    allowed_paths: ["/"]
+    type: secondary
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 88
+    trust_reasons: ["Global academic preprint repository hosted by Cornell", "Transparent versioned preprint tracking", "Moderated scholarly e-prints"]
+    language: en
+    region: international
+    owner: Cornell University
+    notes: Fast preprints in computer science, physics, mathematics, and quantitative biology.
+
+  - id: res_data_gov
+    name: Open Government Data (OGD) Platform India
+    domain_category: research
+    subcategory: datasets_open_data
+    base_url: https://data.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 96
+    trust_reasons: ["National open-data mandate portal", "Official government domain (.gov.in)", "Direct public agency dataset uploads"]
+    language: en
+    region: national
+    owner: National Informatics Centre, MeitY
+    notes: Public domain datasets, APIs, and geospatial resources.
+
+  # BUSINESS
+  - id: biz_startup_india
+    name: Startup India
+    domain_category: business
+    subcategory: startup_schemes
+    base_url: https://www.startupindia.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 95
+    trust_reasons: ["Flagship initiative under DPIIT", "Official government domain (.gov.in)", "DPIIT recognition and tax exemption portal"]
+    language: en
+    region: national
+    owner: Department for Promotion of Industry and Internal Trade
+    notes: Startup recognition, seed fund scheme, and investor matchmaking.
+
+  - id: biz_udyam
+    name: Udyam Registration (MSME)
+    domain_category: business
+    subcategory: msme_support
+    base_url: https://udyamregistration.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 98
+    trust_reasons: ["Zero-fee official MSME registration portal", "Apex official government domain (.gov.in)", "Direct PAN/GST linked certificate"]
+    language: en
+    region: national
+    owner: Ministry of Micro, Small and Medium Enterprises
+    notes: Free online MSME registration; warns against fraudulent fee charging sites.
+
+  - id: biz_gst
+    name: Goods and Services Tax (GST) Portal
+    domain_category: business
+    subcategory: tax_compliance
+    base_url: https://www.gst.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 98
+    trust_reasons: ["National statutory tax filing portal", "Apex official government domain (.gov.in)", "Authoritative return filing schedules and rules"]
+    language: en
+    region: national
+    owner: Goods and Services Tax Network (GSTN)
+    notes: GST registration, return filing rules, and compliance circulars.
+
+  - id: biz_mca
+    name: Ministry of Corporate Affairs (MCA)
+    domain_category: business
+    subcategory: company_registration
+    base_url: https://www.mca.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 98
+    trust_reasons: ["Statutory corporate registry", "Apex official government domain (.gov.in)", "SPICe+ company incorporation forms and company master data"]
+    language: en
+    region: national
+    owner: Ministry of Corporate Affairs, Government of India
+    notes: Company incorporation, LLP registration, and statutory filings.
+
+  - id: biz_dpiit
+    name: DPIIT Industrial Promotion
+    domain_category: business
+    subcategory: licences_regulatory
+    base_url: https://dpiit.gov.in
+    allowed_paths: ["/"]
+    type: official
+    crawl_method: html
+    robots_status: unverified
+    reachability: unverified
+    trust_score: 96
+    trust_reasons: ["Department for Promotion of Industry and Internal Trade", "Official government domain (.gov.in)", "Industrial licensing and FDI regulations"]
+    language: en
+    region: national
+    owner: Ministry of Commerce and Industry
+    notes: Industrial licenses, FDI policy circulars, and intellectual property frameworks.

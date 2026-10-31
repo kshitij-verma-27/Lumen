@@ -350,7 +350,28 @@ async def extract_claims_for_source(session_id: str, source_id: str) -> List[Dic
     ]
     facets_str = "\n".join(facets_prompt_lines)
 
-    prompt = f"""
+    # Process document in chunks if long, capped at 3 chunks
+    chunks = []
+    if len(source_text) <= 6500:
+        chunks = [source_text]
+    else:
+        start = 0
+        while start < len(source_text) and len(chunks) < 3:
+            end = min(len(source_text), start + 6000)
+            chunks.append(source_text[start:end])
+            if end >= len(source_text):
+                break
+            start += 5000
+
+    system_instruction = (
+        "You are an exact information extraction engine. Return ONLY valid JSON with format: "
+        '{"claims": [{"facet": str, "value_raw": str, "exact_quote": str, "scope": str, "version_period": str}]}. '
+        "Never guess. If not found in text, do not include it."
+    )
+
+    extracted_items = []
+    for chunk in chunks:
+        prompt = f"""
 Goal / Question: "{sess_row['goal']}"
 
 You are an exact, evidence-first extraction assistant.
@@ -372,24 +393,19 @@ STRICT EXTRACTION RULES:
 
 SOURCE DOCUMENT:
 \"\"\"
-{source_text[:12000]}
+{chunk}
 \"\"\"
 """
-
-    system_instruction = (
-        "You are an exact information extraction engine. Return ONLY valid JSON with format: "
-        '{"claims": [{"facet": str, "value_raw": str, "exact_quote": str, "scope": str, "version_period": str}]}. '
-        "Never guess. If not found in text, do not include it."
-    )
-
-    llm_output = await generate_json(prompt, system_instruction=system_instruction)
-    extracted_items = llm_output.get("claims", []) if isinstance(llm_output, dict) else []
+        llm_output = await generate_json(prompt, system_instruction=system_instruction)
+        items = llm_output.get("claims", []) if isinstance(llm_output, dict) else []
+        extracted_items.extend(items)
 
     processed_claims = []
 
     # Clean previous claims for this source if re-running
     conn.execute("DELETE FROM claims WHERE source_id = ?", (source_id,))
 
+    seen_quotes = set()
     for item in extracted_items:
         facet = item.get("facet", "").strip()
         value_raw = str(item.get("value_raw", "")).strip()
@@ -400,6 +416,12 @@ SOURCE DOCUMENT:
             version_period = str(version_period).strip()
 
         if not facet or not value_raw or not exact_quote:
+            continue
+
+        # Data quality filter: drop headlines, bare month/years, non-concrete values, and duplicate quotes
+        from app.validation.data_quality import validate_and_dedupe_attribute
+        is_valid_qual, qual_reason = validate_and_dedupe_attribute(facet, value_raw, exact_quote, seen_quotes)
+        if not is_valid_qual:
             continue
 
         # Execute deterministic verification rules

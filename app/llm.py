@@ -547,9 +547,9 @@ def mock_extract(prompt: str) -> Dict[str, Any]:
 
     # Detect version/period/cycle from text
     doc_version_period = None
-    if "2025-26" in source_text:
+    if "2025-26" in source_text or "2025-2026" in source_text:
         doc_version_period = "2025-26"
-    elif "2023-24" in source_text:
+    elif "2023-24" in source_text or "2023-2024" in source_text:
         doc_version_period = "2023-24"
     elif "Fall 2025" in source_text:
         doc_version_period = "Fall 2025"
@@ -716,7 +716,7 @@ def mock_extract(prompt: str) -> Dict[str, Any]:
 
     # Deadline / Expiry across all domains:
     deadline_match = re.search(
-        r'(?:closing\s*date|deadline|last\s*date|application\s*deadline)(?:[^\.\n]{0,60}?)\s*(?:[:\-]|\bis\b|\bwas\b)?\s*([0-9]{1,2}(?:st|nd|rd|th)?\s+[A-Za-z]+,?\s+20\d\d|[0-9]{1,2}[/-][0-9]{1,2}[/-]20\d\d|[A-Za-z]+\s+[0-9]{1,2},?\s+20\d\d)',
+        r'(?:closing\s*date|deadline|last\s*date|application\s*deadline)(?:[^\.\n]{0,160}?)\s*(?:[:\-]|\bis\b|\bwas\b)?\s*([0-9]{1,2}(?:st|nd|rd|th)?\s+[A-Za-z]+,?\s+20\d\d|[0-9]{1,2}[/-][0-9]{1,2}[/-]20\d\d|[A-Za-z]+\s+[0-9]{1,2},?\s+20\d\d)',
         source_text,
         re.IGNORECASE
     )

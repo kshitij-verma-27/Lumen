@@ -24,3 +24,8 @@ env/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Scratch and temporary testing artifacts
+scratch/
+test_*.png
+test_*.db
