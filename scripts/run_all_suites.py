@@ -35,6 +35,7 @@ for tf in test_files:
         continue
     
     suite_db = Path(f"scratch/test_{Path(tf).stem}.db")
+    suite_db.parent.mkdir(parents=True, exist_ok=True)
     if suite_db.exists():
         try:
             suite_db.unlink()
