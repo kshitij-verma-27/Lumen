@@ -990,10 +990,7 @@ def api_get_entity_gaps(entity_id: str):
 frontend_path = Path("frontend")
 if frontend_path.exists():
     app.mount("/static", StaticFiles(directory="frontend"), name="static")
-
-    @app.get("/")
-    def serve_index():
-        return FileResponse(frontend_path / "index.html")
+    app.mount("/", StaticFiles(directory="frontend", html=True), name="frontend")
 
 if __name__ == "__main__":
     import uvicorn
