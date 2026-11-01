@@ -4,14 +4,14 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Lumen — Research Notebook & Information-Gap Engine</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔍</text></svg>">
+  <link rel="stylesheet" href="/static/fonts/fonts.css">
   <link rel="stylesheet" href="/static/style.css">
   <script>
     (function() {
       const params = new URLSearchParams(window.location.search);
       const hash = window.location.hash || "";
+      const savedScale = localStorage.getItem("lumen_font_scale") || "18"; document.documentElement.style.fontSize = savedScale + "px";
       const theme = params.get("theme") || (hash.includes("theme=dark") ? "dark" : null) || localStorage.getItem("lumen_theme") || "light";
       document.documentElement.setAttribute("data-theme", theme);
 
@@ -32,49 +32,54 @@
   <a href="#main-content" class="skip-link">Skip to main content</a>
   <div class="app-layout">
     <!-- Collapsible Notion Sidebar -->
-    <aside id="sidebar" class="notion-sidebar">
+    <div id="sidebar-backdrop" class="sidebar-backdrop" onclick="toggleSidebar()"></div>
+    <aside id="sidebar" class="notion-sidebar" aria-label="Main Navigation">
       <div class="sidebar-header">
-        <div class="sidebar-brand" onclick="navigateToHome()" style="cursor: pointer;">
-          <span class="brand-icon">📓</span>
-          <span class="brand-name">Lumen</span>
+        <div class="sidebar-brand" onclick="navigateToHome()" style="cursor: pointer;" title="Lumen — Finds what is missing">
+          <span class="brand-icon" aria-hidden="true">📓</span>
+          <div class="brand-text-block">
+            <span class="brand-name">Lumen</span>
+            <span class="brand-tagline">Finds what is missing</span>
+          </div>
         </div>
-        <button id="btn-toggle-sidebar" class="sidebar-toggle-btn" title="Toggle Sidebar (Ctrl+\)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+        <button id="btn-sidebar-close" class="sidebar-close-btn" onclick="toggleSidebar()" aria-label="Close navigation sidebar">
+          <span aria-hidden="true">✕</span> <span>Close</span>
         </button>
       </div>
 
-      <div class="sidebar-nav">
+      <div class="sidebar-action-wrap" style="padding: 12px 10px 4px 10px;">
+        <button id="btn-new-investigation" class="sidebar-action-btn" onclick="openNewInvestigation()" style="width: 100%; font-weight: 600; background: var(--accent-ink); color: #ffffff; border-color: var(--accent-ink);">
+          <span class="btn-icon" aria-hidden="true" style="font-size: 1.2rem; font-weight: bold;">+</span> <span>New Investigation</span>
+        </button>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Primary navigation">
         <button id="btn-sidebar-home" class="sidebar-link-btn" onclick="window.location.hash='#/'">
-          <span class="btn-icon">🏛️</span> Home
+          <span class="btn-icon" aria-hidden="true">🏛️</span> <span>Home</span>
         </button>
         <button id="btn-sidebar-domains" class="sidebar-link-btn" onclick="window.location.hash='#/category/education'">
-          <span class="btn-icon">📂</span> Explore Domains
+          <span class="btn-icon" aria-hidden="true">📂</span> <span>Explore</span>
         </button>
         <button id="btn-sidebar-registry" class="sidebar-link-btn" onclick="window.location.hash='#/registry'">
-          <span class="btn-icon">📋</span> Source Registry
-        </button>
-        <button id="btn-new-investigation" class="sidebar-action-btn" onclick="window.location.hash='#/investigate'">
-          <span class="btn-icon">+</span> New Investigation
+          <span class="btn-icon" aria-hidden="true">📋</span> <span>Source registry</span>
         </button>
         <button id="btn-open-profile" class="sidebar-link-btn" onclick="openProfileModal()">
-          <span class="btn-icon">👤</span> Your Profile
+          <span class="btn-icon" aria-hidden="true">👤</span> <span>Profile</span>
           <span id="profile-indicator" class="profile-status-dot"></span>
         </button>
-      </div>
+      </nav>
 
       <div class="sidebar-section">
-        <div class="sidebar-section-title">Past Investigations</div>
+        <div class="sidebar-section-header" style="display: flex; align-items: center; justify-content: space-between; padding: 0 8px 8px 8px;">
+          <div class="sidebar-section-title" style="padding: 0;">Past Investigations</div>
+          <button id="btn-clear-history" type="button" class="btn-clear-history" onclick="clearInvestigationHistory()" title="Clear past history">Clear</button>
+        </div>
         <div id="sidebar-history-list" class="sidebar-history-list">
           <div class="history-empty">No past investigations yet.</div>
         </div>
       </div>
 
       <div class="sidebar-footer">
-        <div class="sidebar-footer-row">
-          <button id="theme-toggle" class="theme-toggle-btn" onclick="toggleTheme()" title="Switch Light / Dark Theme">
-            <span id="theme-icon">🌙</span> <span id="theme-text">Dark Mode</span>
-          </button>
-        </div>
         <div id="llm-mode-badge" class="badge badge-mock" style="width: 100%; justify-content: center; margin-top: 0.5rem;">
           <span class="dot"></span>
           <span id="llm-mode-text">Checking LLM status...</span>
@@ -87,8 +92,8 @@
       <!-- Minimalist Top Bar -->
       <header class="notion-topbar">
         <div class="topbar-left">
-          <button id="btn-sidebar-open" class="icon-btn sidebar-open-btn" onclick="toggleSidebar()" title="Expand Sidebar">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+          <button id="btn-sidebar-open" class="sidebar-open-btn" onclick="toggleSidebar()" aria-label="Open navigation sidebar" style="margin-right: 10px;">
+            <span class="hamburger-icon" aria-hidden="true">☰</span> <span>Menu</span>
           </button>
           <div class="breadcrumbs">
             <span class="breadcrumb-item" onclick="navigateToHome()" style="cursor: pointer;">Notebook</span>
@@ -98,13 +103,28 @@
         </div>
         <div class="topbar-right">
           <div class="topbar-actions">
-            <div class="font-size-controls" style="display: inline-flex; align-items: center; border: 1px solid var(--border-hairline); border-radius: var(--radius-sm); overflow: hidden; margin-right: 4px;">
-              <button class="notion-btn-ghost btn-mini" onclick="changeFontSize(-1)" title="Decrease font size" aria-label="Decrease text size" style="padding: 4px 8px; font-size: 11px;">A−</button>
-              <button class="notion-btn-ghost btn-mini" onclick="changeFontSize(1)" title="Increase font size" aria-label="Increase text size" style="padding: 4px 8px; font-size: 13px; font-weight: 600;">A+</button>
+            <!-- Profile Button -->
+            <button id="btn-topbar-profile" class="notion-btn-subtle" onclick="openProfileModal()" aria-label="Open personal profile modal">
+              <span aria-hidden="true">👤</span> <span>Profile</span>
+            </button>
+
+            <!-- More Actions Dropdown Menu (Accessibility, Download JSON, Printable Report) -->
+            <div class="topbar-dropdown" style="position: relative;">
+              <button id="btn-topbar-more" class="notion-btn-subtle" onclick="toggleMoreMenu(event)" aria-haspopup="true" aria-expanded="false" aria-label="More actions">
+                <span aria-hidden="true">⋯</span> <span>More</span>
+              </button>
+              <div id="topbar-more-menu" class="dropdown-menu" style="display: none;">
+                <button id="btn-more-accessibility" class="dropdown-item-btn" onclick="openAccessibilityModal(); closeMoreMenu();" title="Open accessibility and display settings">
+                  <span aria-hidden="true">♿</span> <span>Accessibility</span>
+                </button>
+                <button id="btn-export-json" class="dropdown-item-btn" onclick="exportAuditTrailJson(); closeMoreMenu();" title="Download structured audit trail JSON">
+                  <span aria-hidden="true">📥</span> <span>Download JSON</span>
+                </button>
+                <button id="btn-export-html" class="dropdown-item-btn" onclick="exportAuditTrailHtml(); closeMoreMenu();" title="Open printable audit trail report">
+                  <span aria-hidden="true">🖨️</span> <span>Printable report</span>
+                </button>
+              </div>
             </div>
-            <button id="btn-export-json" class="notion-btn-subtle" onclick="exportAuditTrailJson()" title="Download structured audit trail JSON">📥 JSON</button>
-            <button id="btn-export-html" class="notion-btn-subtle" onclick="exportAuditTrailHtml()" title="Open printable audit trail report">🖨️ Report</button>
-            <button class="notion-btn-subtle" onclick="openProfileModal()" aria-label="Open personal profile modal">👤 Profile</button>
           </div>
         </div>
       </header>
@@ -116,216 +136,116 @@
         <!-- VIEW 1: HOME SCREEN (Gallery & Search)        -->
         <!-- ============================================== -->
         <section id="home-view" class="home-screen-view">
-          <div class="home-hero">
-            <div class="home-badge">RESEARCH NOTEBOOK & BLINDSPOT ENGINE</div>
-            <h1 class="home-title">What are you investigating today?</h1>
-            <p class="home-subtitle">Verify facts against raw source text, reveal hidden missing information ("dark spots"), and detect contradictions across claims.</p>
-          </div>
+          <div class="chat-container">
+            <div id="chat-thread-scroll" class="chat-thread-scroll">
+              
+              <!-- Empty State: Friendly Greeting, Composer, Suggestion Chips, 1-Click Demo -->
+              <div id="chat-empty-state" class="chat-empty-state">
+                <h1 class="chat-greeting">What would you like to check?</h1>
+                <p class="chat-greeting-desc">We read multiple sources, find what is missing, and flag where sources disagree.</p>
 
-          <!-- Demo Snapshot Reliability Banner -->
-          <div id="demo-snapshot-banner" class="demo-snapshot-banner">
-            <div class="demo-snapshot-left">
-              <span class="snapshot-pill">OFFLINE RELIABILITY</span>
-              <span id="snapshot-status-text">Demo snapshot taken 31 Oct 2026</span>
-            </div>
-            <button class="notion-btn-subtle btn-mini" onclick="refreshLiveSnapshot()" title="Re-sync data with live official seeds">↻ Refresh Live</button>
-          </div>
+                <!-- 4 Suggestion Chips -->
+                <div class="suggestion-chips-grid" role="group" aria-label="Preset research questions">
+                  <button type="button" class="suggestion-chip" onclick="selectSuggestion('scholarship')">
+                    <span class="chip-icon" aria-hidden="true">🎓</span>
+                    <div class="chip-content">
+                      <div class="chip-title">Scholarship Scheme</div>
+                      <div class="chip-sub">Check eligibility, deadlines, and benefits for students</div>
+                    </div>
+                  </button>
 
-          <!-- 5 Domain Navigation Chips -->
-          <div class="domain-nav-chips">
-            <a class="domain-chip" href="#/category/education">🎓 Education <span class="chip-count" id="count-chip-edu">10 seeds</span></a>
-            <a class="domain-chip" href="#/category/career">💼 Career <span class="chip-count" id="count-chip-car">4 seeds</span></a>
-            <a class="domain-chip" href="#/category/public_services">🏛️ Public Services <span class="chip-count" id="count-chip-pub">5 seeds</span></a>
-            <a class="domain-chip" href="#/category/research">🔬 Research <span class="chip-count" id="count-chip-res">5 seeds</span></a>
-            <a class="domain-chip" href="#/category/business">🏢 Business <span class="chip-count" id="count-chip-biz">5 seeds</span></a>
-          </div>
+                  <button type="button" class="suggestion-chip" onclick="selectSuggestion('college_admission')">
+                    <span class="chip-icon" aria-hidden="true">🏛️</span>
+                    <div class="chip-content">
+                      <div class="chip-title">College Admission</div>
+                      <div class="chip-sub">Check cutoffs, fees, and admission criteria</div>
+                    </div>
+                  </button>
 
-          <!-- Prominent "Investigate a Question" Entry -->
-          <div class="home-investigate-card">
-            <div class="investigate-card-header">
-              <div class="investigate-badge">INTERACTIVE INVESTIGATION WORKFLOW</div>
-              <h2 class="investigate-card-title">Investigate a Question</h2>
-              <p class="investigate-card-desc">Pose any custom question, paste source URLs, and run the multi-source verification, gap detection, and red-team refutation pipeline.</p>
-            </div>
-            <div class="search-input-wrap">
-              <span class="search-icon">🔍</span>
-              <input type="text" id="home-search-input" placeholder="Enter research question (e.g., What are the exact eligibility, benefits, and deadlines for PM Research Fellowship?)..." onkeydown="if(event.key==='Enter') executeHomeInvestigate()">
-              <button id="btn-home-search" class="notion-btn-primary" onclick="executeHomeInvestigate()">Investigate →</button>
-            </div>
-            <div class="investigate-quick-actions">
-              <button class="btn-demo-prominent" onclick="launch1ClickDemo()" title="Run instant live demo with official sources">⚡ 1-Click Demo: National Scholarship Scheme</button>
-              <div class="search-hints">
-                <span>Or explore preset topics:</span>
-                <a href="javascript:void(0)" onclick="launchTopicInvestigation('college_admission')">Graduate Admissions</a>
-                <a href="javascript:void(0)" onclick="launchTopicInvestigation('scholarships')">Scholarships</a>
-                <a href="javascript:void(0)" onclick="launchTopicInvestigation('government_scheme')">Govt Scheme</a>
-                <a href="javascript:void(0)" onclick="launchTopicInvestigation('laptop')">Hardware / Laptop</a>
+                  <button type="button" class="suggestion-chip" onclick="selectSuggestion('government_scheme')">
+                    <span class="chip-icon" aria-hidden="true">📋</span>
+                    <div class="chip-content">
+                      <div class="chip-title">Government Scheme</div>
+                      <div class="chip-sub">Check income ceilings, welfare criteria, and documents</div>
+                    </div>
+                  </button>
+
+                  <button type="button" class="suggestion-chip" onclick="selectSuggestion('laptop')">
+                    <span class="chip-icon" aria-hidden="true">💻</span>
+                    <div class="chip-content">
+                      <div class="chip-title">Laptop Purchase</div>
+                      <div class="chip-sub">Check performance, warranty, and price under $2,500</div>
+                    </div>
+                  </button>
+                </div>
+
+                <!-- 1-Click Demo Action -->
+                <div class="demo-action-row">
+                  <button id="btn-home-1click-demo" type="button" class="btn-demo-primary" onclick="runOneClickDemo()">
+                    <span aria-hidden="true">🚀</span> <span>Try the 1-click demo</span>
+                  </button>
+                </div>
+
+                <!-- Secondary Area: Snapshot Reliability Banner & Explore Domain Chips -->
+                <div class="home-secondary-section" style="width: 100%;">
+                  <div id="demo-snapshot-banner" class="demo-snapshot-banner" style="margin-bottom: 16px;">
+                    <div class="demo-snapshot-left">
+                      <span class="snapshot-pill">OFFLINE RELIABILITY</span>
+                      <span id="snapshot-status-text">Demo snapshot taken 31 Oct 2026</span>
+                    </div>
+                    <button class="notion-btn-subtle btn-mini" onclick="refreshLiveSnapshot()" title="Re-sync data with live official sources">↻ Refresh Live</button>
+                  </div>
+
+                  <div class="domain-nav-chips">
+                    <a class="domain-chip" href="#/category/education">🎓 Education <span class="chip-count" id="count-chip-edu">10 sources</span></a>
+                    <a class="domain-chip" href="#/category/career">💼 Career <span class="chip-count" id="count-chip-car">4 sources</span></a>
+                    <a class="domain-chip" href="#/category/public_services">🏛️ Public Services <span class="chip-count" id="count-chip-pub">5 sources</span></a>
+                    <a class="domain-chip" href="#/category/research">🔬 Research <span class="chip-count" id="count-chip-res">5 sources</span></a>
+                    <a class="domain-chip" href="#/category/business">🏢 Business <span class="chip-count" id="count-chip-biz">5 sources</span></a>
+                  </div>
+                </div>
+
               </div>
+
+              <!-- Chat Messages Thread List (populated when question is sent) -->
+              <div id="chat-messages-list" class="chat-messages-list" aria-live="polite"></div>
+
             </div>
-          </div>
 
-          <!-- Recently Verified Public Entities Gallery -->
-          <div class="topic-gallery-header" style="margin-top: 28px;">
-            <div style="display: flex; justify-content: space-between; align-items: baseline;">
-              <h2>Recently Verified Official Entities</h2>
-              <a href="#/category/education" style="font-size: 13px; color: var(--tag-blue-text); text-decoration: none;">View all in Explorer →</a>
-            </div>
-            <p>Code-verified with verbatim quotes against raw portal DOM. Click any entity to inspect claims, evidence, and dark spots.</p>
-          </div>
-          <div id="home-recent-entities" class="entity-cards-grid">
-            <div class="history-empty">Loading verified entities...</div>
-          </div>
+            <!-- Fixed Composer at the Bottom -->
+            <div class="chat-composer-fixed-wrap" id="chat-composer-container">
+              <div class="composer-box-inner">
+                <label for="chat-input" class="sr-only" style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;">What would you like to check?</label>
+                <textarea id="chat-input" class="composer-textarea" rows="2" placeholder="Ask what you would like to check... (Enter sends, Shift+Enter makes a new line)" onkeydown="handleComposerKeydown(event)"></textarea>
+                
+                <!-- Attached Source Chips Container -->
+                <div id="chat-source-chips" class="composer-attached-chips" aria-label="Attached sources list"></div>
 
-          <!-- Profile Callout Banner if not fully configured -->
-          <div id="home-profile-banner" class="home-profile-banner" style="display: none; margin-top: 24px;">
-            <div class="profile-banner-content">
-              <span class="profile-banner-icon">🎯</span>
-              <div>
-                <strong>Personalize your applicability filter</strong>
-                <p>Add your student/career status and goal to automatically mark findings as <em>"applies to you / doesn't"</em>.</p>
-              </div>
-            </div>
-            <button class="notion-btn-secondary btn-small" onclick="openProfileModal()">Edit Profile</button>
-          </div>
-
-          <!-- Topic Cards Gallery (6 Preset Categories) -->
-          <div class="topic-gallery-header" style="margin-top: 32px;">
-            <h2>Investigation Templates & Preset Sources</h2>
-            <p>Each card includes 3–5 editable preset links. Click to launch an instant investigation or edit preset sources.</p>
-          </div>
-
-          <div class="topic-gallery-grid">
-            <!-- 1. Exams & Cutoffs -->
-            <div class="topic-card" id="card-exams">
-              <div class="topic-card-header">
-                <div class="topic-icon">📊</div>
-                <div class="topic-header-text">
-                  <h3>Exams & Cutoffs</h3>
-                  <span class="topic-badge">Academic</span>
+                <!-- Composer Bottom Controls -->
+                <div class="composer-bar-bottom">
+                  <div style="display: flex; align-items: center; gap: 10px;">
+                    <button id="btn-chat-add-source" type="button" class="btn-composer-secondary" onclick="openAddSourceDrawer()" title="Add web URLs or paste text as evidence sources">
+                      <span aria-hidden="true">+</span> <span>Add sources</span>
+                    </button>
+                    <span id="composer-sources-count" class="composer-sources-note" style="color: var(--text-secondary); font-size: 0.95rem;">0 sources attached</span>
+                  </div>
+                  <div>
+                    <button id="btn-chat-send" type="button" class="btn-composer-send" onclick="handleComposerSubmit()" title="Run investigation on attached sources">
+                      <span>Check</span> <span aria-hidden="true">→</span>
+                    </button>
+                  </div>
                 </div>
               </div>
-              <p class="topic-desc">Analyze qualifying percentiles, category cutoffs, reservation criteria, and tie-breaking algorithms.</p>
-              <div class="topic-presets-preview" id="presets-preview-exams"></div>
-              <div class="topic-card-actions">
-                <button class="notion-btn-primary btn-small" onclick="launchTopicInvestigation('exams')">Investigate</button>
-                <button class="notion-btn-ghost btn-small" onclick="togglePresetEditor('exams')">Edit Presets</button>
-              </div>
-              <div class="preset-editor-drawer" id="drawer-exams" style="display: none;">
-                <label>Preset Source URLs (one per line):</label>
-                <textarea id="presets-text-exams" rows="4"></textarea>
-                <button class="notion-btn-secondary btn-small" onclick="saveCustomPresets('exams')">Save Presets</button>
-              </div>
             </div>
 
-            <!-- 2. College Admission -->
-            <div class="topic-card" id="card-college">
-              <div class="topic-card-header">
-                <div class="topic-icon">🏛️</div>
-                <div class="topic-header-text">
-                  <h3>College Admission</h3>
-                  <span class="topic-badge">Higher Ed</span>
-                </div>
-              </div>
-              <p class="topic-desc">Verify minimum GPA, English proficiency waivers, prerequisite courses, and hard application deadlines.</p>
-              <div class="topic-presets-preview" id="presets-preview-college"></div>
-              <div class="topic-card-actions">
-                <button class="notion-btn-primary btn-small" onclick="launchTopicInvestigation('college_admission')">Investigate</button>
-                <button class="notion-btn-ghost btn-small" onclick="togglePresetEditor('college_admission')">Edit Presets</button>
-              </div>
-              <div class="preset-editor-drawer" id="drawer-college_admission" style="display: none;">
-                <label>Preset Source URLs (one per line):</label>
-                <textarea id="presets-text-college_admission" rows="4"></textarea>
-                <button class="notion-btn-secondary btn-small" onclick="saveCustomPresets('college_admission')">Save Presets</button>
-              </div>
-            </div>
+          </div>
 
-            <!-- 3. Scholarships & Subsidies -->
-            <div class="topic-card" id="card-scholarships">
-              <div class="topic-card-header">
-                <div class="topic-icon">📜</div>
-                <div class="topic-header-text">
-                  <h3>Scholarships & Subsidies</h3>
-                  <span class="topic-badge">Financial</span>
-                </div>
-              </div>
-              <p class="topic-desc">Identify family income ceilings, required documents, disbursement timelines, and hostel allowances.</p>
-              <div class="topic-presets-preview" id="presets-preview-scholarships"></div>
-              <div class="topic-card-actions">
-                <button class="notion-btn-primary btn-small" onclick="launchTopicInvestigation('scholarships')">Investigate</button>
-                <button class="notion-btn-ghost btn-small" onclick="togglePresetEditor('scholarships')">Edit Presets</button>
-              </div>
-              <div class="preset-editor-drawer" id="drawer-scholarships" style="display: none;">
-                <label>Preset Source URLs (one per line):</label>
-                <textarea id="presets-text-scholarships" rows="4"></textarea>
-                <button class="notion-btn-secondary btn-small" onclick="saveCustomPresets('scholarships')">Save Presets</button>
-              </div>
-            </div>
-
-            <!-- 4. Hackathons & Competitions -->
-            <div class="topic-card" id="card-hackathons">
-              <div class="topic-card-header">
-                <div class="topic-icon">💻</div>
-                <div class="topic-header-text">
-                  <h3>Hackathons & Competitions</h3>
-                  <span class="topic-badge">Events</span>
-                </div>
-              </div>
-              <p class="topic-desc">Examine intellectual property ownership, team size restrictions, judging rubrics, and submission cutoffs.</p>
-              <div class="topic-presets-preview" id="presets-preview-hackathons"></div>
-              <div class="topic-card-actions">
-                <button class="notion-btn-primary btn-small" onclick="launchTopicInvestigation('hackathons')">Investigate</button>
-                <button class="notion-btn-ghost btn-small" onclick="togglePresetEditor('hackathons')">Edit Presets</button>
-              </div>
-              <div class="preset-editor-drawer" id="drawer-hackathons" style="display: none;">
-                <label>Preset Source URLs (one per line):</label>
-                <textarea id="presets-text-hackathons" rows="4"></textarea>
-                <button class="notion-btn-secondary btn-small" onclick="saveCustomPresets('hackathons')">Save Presets</button>
-              </div>
-            </div>
-
-            <!-- 5. Co-curricular & Fellowships -->
-            <div class="topic-card" id="card-fellowships">
-              <div class="topic-card-header">
-                <div class="topic-icon">🤝</div>
-                <div class="topic-header-text">
-                  <h3>Co-curricular & Fellowships</h3>
-                  <span class="topic-badge">Programs</span>
-                </div>
-              </div>
-              <p class="topic-desc">Verify monthly stipend, travel support, mentor commitment expectations, and eligibility tenure.</p>
-              <div class="topic-presets-preview" id="presets-preview-fellowships"></div>
-              <div class="topic-card-actions">
-                <button class="notion-btn-primary btn-small" onclick="launchTopicInvestigation('fellowships')">Investigate</button>
-                <button class="notion-btn-ghost btn-small" onclick="togglePresetEditor('fellowships')">Edit Presets</button>
-              </div>
-              <div class="preset-editor-drawer" id="drawer-fellowships" style="display: none;">
-                <label>Preset Source URLs (one per line):</label>
-                <textarea id="presets-text-fellowships" rows="4"></textarea>
-                <button class="notion-btn-secondary btn-small" onclick="saveCustomPresets('fellowships')">Save Presets</button>
-              </div>
-            </div>
-
-            <!-- 6. Career Options -->
-            <div class="topic-card" id="card-career">
-              <div class="topic-card-header">
-                <div class="topic-icon">🧭</div>
-                <div class="topic-header-text">
-                  <h3>Career Options</h3>
-                  <span class="topic-badge topic-badge-signal">potential options to verify</span>
-                </div>
-              </div>
-              <p class="topic-desc">Analyze required certifications, typical entry salaries, and licensing prerequisites. <em>Strictly potential options to verify, never professional advice.</em></p>
-              <div class="topic-presets-preview" id="presets-preview-career"></div>
-              <div class="topic-card-actions">
-                <button class="notion-btn-primary btn-small" onclick="launchTopicInvestigation('career')">Investigate</button>
-                <button class="notion-btn-ghost btn-small" onclick="togglePresetEditor('career')">Edit Presets</button>
-              </div>
-              <div class="preset-editor-drawer" id="drawer-career" style="display: none;">
-                <label>Preset Source URLs (one per line):</label>
-                <textarea id="presets-text-career" rows="4"></textarea>
-                <button class="notion-btn-secondary btn-small" onclick="saveCustomPresets('career')">Save Presets</button>
-              </div>
-            </div>
+          <!-- Hidden legacy elements for complete backward compatibility with existing tests/APIs -->
+          <div style="display: none !important;">
+            <input type="text" id="home-search-input">
+            <button id="btn-home-search"></button>
+            <div id="home-recent-entities"></div>
+            <div id="home-profile-banner"></div>
           </div>
         </section>
 
@@ -342,7 +262,7 @@
               <span id="cat-current-name" class="breadcrumb-current">Education</span>
             </div>
             <h1 id="cat-title" class="serif-heading" style="margin-top: 12px; font-size: 28px;">Education & Academics</h1>
-            <p id="cat-desc" style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Verified cutoffs, scholarships, official academic portals, and institutional guidelines.</p>
+            <p id="cat-desc" style="color: var(--text-secondary); font-size: 1rem; margin-top: 4px;">Verified cutoffs, scholarships, official academic portals, and institutional guidelines.</p>
           </div>
 
           <!-- Domain Switcher Pills -->
@@ -373,7 +293,7 @@
               <span class="breadcrumb-current">Search</span>
             </div>
             <h1 class="serif-heading" style="margin-top: 12px; font-size: 28px;">Search Results</h1>
-            <p id="search-query-summary" style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">Found 0 matching entities</p>
+            <p id="search-query-summary" style="color: var(--text-secondary); font-size: 1rem; margin-top: 4px;">Found 0 matching entities</p>
           </div>
 
           <div id="search-results-grid" class="entity-cards-grid" style="margin-top: 20px;">
@@ -400,7 +320,7 @@
                 <span class="snapshot-pill">OFFLINE RELIABILITY</span>
                 <span id="entity-snapshot-status-text">Demo snapshot taken 31 Oct 2026</span>
               </div>
-              <button class="notion-btn-subtle btn-mini" onclick="refreshLiveSnapshot()" title="Re-sync data with live official seeds">↻ Refresh Live</button>
+              <button class="notion-btn-subtle btn-mini" onclick="refreshLiveSnapshot()" title="Re-sync data with live official sources">↻ Refresh Live</button>
             </div>
 
             <div style="display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-top: 12px;">
@@ -468,16 +388,16 @@
               <!-- Eligibility -->
               <div class="fact-group-card">
                 <div class="fact-group-title">🎓 Eligibility Criteria</div>
-                <div style="font-size: 13.5px; color: var(--text-secondary);">
+                <div style="font-size: 1rem; color: var(--text-secondary);">
                   <span class="redaction-bar" tabindex="0" role="button" aria-label="Reveal missing information" onclick="this.classList.toggle('revealed')">Missing: Minimum qualification and age restrictions not found in source text</span>
-                  <span style="font-size: 11px; color: var(--text-tertiary); margin-left: 8px;">(Hover or tap redaction to inspect)</span>
+                  <span style="font-size: 1rem; color: var(--text-tertiary); margin-left: 8px;">(Hover or tap redaction to inspect)</span>
                 </div>
               </div>
 
               <!-- Fees & Costs -->
               <div class="fact-group-card">
                 <div class="fact-group-title">💰 Fees & Application Cost</div>
-                <div style="font-size: 13.5px; color: var(--text-secondary);">
+                <div style="font-size: 1rem; color: var(--text-secondary);">
                   <span class="redaction-bar" tabindex="0" role="button" aria-label="Reveal missing information" onclick="this.classList.toggle('revealed')">Missing: Category-wise application fee breakdown not specified</span>
                 </div>
               </div>
@@ -485,7 +405,7 @@
               <!-- Deadlines & Dates -->
               <div class="fact-group-card">
                 <div class="fact-group-title">📅 Application Schedule & Deadlines</div>
-                <div style="font-size: 14.5px; font-weight: 500; color: var(--text-primary);">
+                <div style="font-size: 1rem; font-weight: 500; color: var(--text-primary);">
                   <mark class="highlight-fact">31-10-2026</mark>
                   <span class="badge badge-official" style="margin-left: 6px;">VERIFIED [OK]</span>
                 </div>
@@ -495,7 +415,7 @@
               <!-- Application Link -->
               <div class="fact-group-card">
                 <div class="fact-group-title">🔗 Official Application Portal</div>
-                <div style="font-size: 14.5px; font-weight: 500; color: var(--text-primary);">
+                <div style="font-size: 1rem; font-weight: 500; color: var(--text-primary);">
                   <mark class="highlight-fact">https://scholarships.gov.in</mark>
                   <span class="badge badge-official" style="margin-left: 6px;">VERIFIED [OK]</span>
                 </div>
@@ -505,7 +425,7 @@
               <!-- Mandatory Documents -->
               <div class="fact-group-card">
                 <div class="fact-group-title">📑 Mandatory Documentation</div>
-                <div style="font-size: 13.5px; color: var(--text-secondary);">
+                <div style="font-size: 1rem; color: var(--text-secondary);">
                   <span class="redaction-bar" tabindex="0" role="button" aria-label="Reveal missing information" onclick="this.classList.toggle('revealed')">Missing: Mandatory document specifications not listed</span>
                 </div>
               </div>
@@ -513,7 +433,7 @@
               <!-- Official Helpdesk & Contact -->
               <div class="fact-group-card">
                 <div class="fact-group-title">📞 Helpdesk & Support</div>
-                <div style="font-size: 13.5px; color: var(--text-secondary);">
+                <div style="font-size: 1rem; color: var(--text-secondary);">
                   <span class="redaction-bar" tabindex="0" role="button" aria-label="Reveal missing information" onclick="this.classList.toggle('revealed')">Missing: Official support helpline or email not verified</span>
                 </div>
               </div>
@@ -546,7 +466,7 @@
               <strong>⚠️ Claims Requiring Manual Review (Uncertain)</strong>
               <span id="uncertain-count-badge" class="badge badge-brick">0 Claims</span>
             </div>
-            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 8px;">
+            <p style="font-size: 1rem; color: var(--text-secondary); margin-bottom: 8px;">
               The following claims were extracted from raw sources but failed strict verbatim quote verification, exceeded threshold, or contained ambiguous status words.
             </p>
             <div id="uncertain-claims-list"></div>
@@ -564,8 +484,8 @@
               <span class="breadcrumb-current">Source Registry</span>
             </div>
             <h1 class="serif-heading" style="margin-top: 12px; font-size: 28px;">Official Seed Registry & Politeness Audit</h1>
-            <p style="color: var(--text-secondary); font-size: 14px; margin-top: 4px;">
-              29 official seeds audited live across 5 domains. For sources that returned HTTP 403 or thin (SPA) sources, use the Paste Text action to ingest official circulars directly.
+            <p style="color: var(--text-secondary); font-size: 1rem; margin-top: 4px;">
+              29 official sources audited live across 5 domains. For sources that returned HTTP 403 or thin (SPA) sources, use the Paste Text action to ingest official circulars directly.
             </p>
           </div>
 
@@ -610,7 +530,7 @@
                 </select>
               </div>
               <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span style="font-size: 11.5px; color: var(--text-tertiary);">Protected against SSRF, internal network traversal, and cloud metadata access.</span>
+                <span style="font-size: 1rem; color: var(--text-tertiary);">Protected against SSRF, internal network traversal, and cloud metadata access.</span>
                 <div style="display: flex; gap: 8px;">
                   <button type="button" class="notion-btn-ghost btn-small" onclick="toggleAddRegistrySourcePanel()">Cancel</button>
                   <button type="submit" id="btn-submit-add-reg" class="notion-btn-primary btn-small">Validate & Ingest</button>
@@ -677,7 +597,7 @@
           <!-- Trust Badge & Top 3 Reasons Card -->
           <div class="fact-group-card" style="margin-top: 18px;">
             <div class="fact-group-title">🛡️ Trust Evaluation & Verification Credentials</div>
-            <div style="font-size: 14px; margin-bottom: 12px;">
+            <div style="font-size: 1rem; margin-bottom: 12px;">
               <strong>Trust Score:</strong> <span id="src-trust-score" style="font-weight: 600; color: var(--tag-sage-text);">95/100</span>
             </div>
             <div id="src-top-reasons" style="display: flex; flex-direction: column; gap: 6px;">
@@ -701,11 +621,11 @@
             </div>
             <div class="property-row">
               <div class="property-label"><span class="property-icon">🔑</span> Content SHA-256</div>
-              <div class="property-value"><code id="src-hash" style="font-size: 12px; font-family: var(--font-mono); color: var(--text-secondary); word-break: break-all;">-</code></div>
+              <div class="property-value"><code id="src-hash" style="font-size: 1rem; font-family: var(--font-mono); color: var(--text-secondary); word-break: break-all;">-</code></div>
             </div>
             <div class="property-row">
               <div class="property-label"><span class="property-icon">⏰</span> Validated / Fetch Time</div>
-              <div class="property-value"><span id="src-fetch-time" style="font-size: 13px; color: var(--text-secondary);">-</span></div>
+              <div class="property-value"><span id="src-fetch-time" style="font-size: 1rem; color: var(--text-secondary);">-</span></div>
             </div>
             <div class="property-row">
               <div class="property-label"><span class="property-icon">ℹ️</span> Audit Note</div>
@@ -788,13 +708,13 @@
             <!-- Property 4: Red-Team Verifier -->
             <div class="property-row" id="property-redteam-row">
               <div class="property-label">
-                <span class="property-icon">🛡️</span> Red-Team Audit
+                <span class="property-icon">🛡️</span> Double-Check Audit
               </div>
               <div class="property-value">
                 <div class="stat-pill stat-redteam" id="pill-redteam" style="display: none;">
                   <span class="stat-num" id="stat-redteam-counter">-</span>
                 </div>
-                <span id="redteam-subtext" class="property-hint">Adversarial quote refutation active</span>
+                <span id="redteam-subtext" class="property-hint">Double-check: Verifies quotes against source text</span>
               </div>
             </div>
 
@@ -1280,5 +1200,142 @@
   </nav>
 
   <script src="/static/app.js"></script>
+
+  <!-- Accessible Add Sources Drawer / Modal -->
+  <div id="chat-add-source-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="chat-add-source-title">
+      <div class="modal-header">
+        <h3 id="chat-add-source-title">Add Sources to Investigation</h3>
+        <button class="notion-btn-ghost btn-small" onclick="closeAddSourceDrawer()" aria-label="Close dialog">✕ Close</button>
+      </div>
+      <div class="modal-body" style="padding: 16px 0;">
+        <div class="tab-buttons" style="display: flex; gap: 8px; margin-bottom: 16px;">
+          <button id="tab-btn-url" type="button" class="notion-btn-primary" onclick="switchAddSourceTab('url')">🌐 Web URL</button>
+          <button id="tab-btn-paste" type="button" class="notion-btn-secondary" onclick="switchAddSourceTab('paste')">📋 Paste Text</button>
+        </div>
+        <div id="add-source-tab-url">
+          <label for="chat-source-url-input" style="display: block; font-weight: 500; margin-bottom: 6px;">Web page URL:</label>
+          <input type="url" id="chat-source-url-input" class="property-input" placeholder="https://example.com/guidelines-or-circular" style="width: 100%; min-height: 48px; font-size: 1rem;">
+        </div>
+        <div id="add-source-tab-paste" style="display: none;">
+          <label for="chat-source-title-input" style="display: block; font-weight: 500; margin-bottom: 6px;">Document Title:</label>
+          <input type="text" id="chat-source-title-input" class="property-input" placeholder="Official announcement or press release" style="width: 100%; min-height: 48px; font-size: 1rem; margin-bottom: 12px;">
+          <label for="chat-source-paste-input" style="display: block; font-weight: 500; margin-bottom: 6px;">Document Text:</label>
+          <textarea id="chat-source-paste-input" class="property-input" rows="5" placeholder="Paste circular or raw text here..." style="width: 100%; font-size: 1rem;"></textarea>
+        </div>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 18px;">
+        <button type="button" class="notion-btn-secondary" onclick="closeAddSourceDrawer()">Cancel</button>
+        <button id="btn-add-source-confirm" type="button" class="notion-btn-primary" onclick="confirmAddSource()">Attach Source</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Accessibility Settings Modal Dialog -->
+  <div id="accessibility-modal" class="modal-overlay" style="display: none;" onclick="if(event.target===this) closeAccessibilityModal()">
+    <div class="modal-box a11y-modal-box" role="dialog" aria-modal="true" aria-labelledby="a11y-modal-title" style="max-width: 520px; width: 90%;">
+      <div class="modal-header" style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-hairline); padding-bottom: 12px; margin-bottom: 16px;">
+        <h2 id="a11y-modal-title" style="margin: 0; font-size: 1.25rem; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+          <span aria-hidden="true">♿</span> Accessibility &amp; Display
+        </h2>
+        <button id="btn-close-accessibility" class="icon-btn notion-btn-ghost btn-mini" onclick="closeAccessibilityModal()" aria-label="Close accessibility settings" style="min-height: 40px; padding: 6px 12px; font-size: 1rem;">✕ Close</button>
+      </div>
+
+      <div class="modal-body" style="display: flex; flex-direction: column; gap: 20px;">
+        <!-- 1. Text Size -->
+        <div class="a11y-setting-group">
+          <label style="display: block; font-weight: 600; margin-bottom: 8px;">Text Size (16px – 24px)</label>
+          <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+            <button id="btn-a11y-font-decrease" type="button" class="notion-btn-subtle" onclick="changeFontSize(-1); updateA11yControls();" style="min-height: 48px; padding: 10px 16px;">
+              <span aria-hidden="true" style="font-weight: bold;">A−</span> <span>Smaller</span>
+            </button>
+            <span id="a11y-font-size-val" style="font-weight: 600; font-size: 1.15rem; min-width: 60px; text-align: center;">18px</span>
+            <button id="btn-a11y-font-increase" type="button" class="notion-btn-subtle" onclick="changeFontSize(1); updateA11yControls();" style="min-height: 48px; padding: 10px 16px;">
+              <span aria-hidden="true" style="font-weight: bold;">A+</span> <span>Larger</span>
+            </button>
+            <button id="btn-a11y-font-reset" type="button" class="notion-btn-ghost" onclick="resetFontSize(); updateA11yControls();" style="min-height: 48px; padding: 10px 16px;">
+              <span>Reset</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 2. Theme -->
+        <fieldset class="a11y-setting-group" style="border: none; padding: 0; margin: 0;">
+          <legend style="font-weight: 600; margin-bottom: 8px;">Theme</legend>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 14px; border: 1px solid var(--border-hairline); border-radius: var(--radius-md); min-height: 48px; box-sizing: border-box;">
+              <input type="radio" id="theme-radio-light" name="a11y-theme" value="light" onchange="setTheme('light'); updateA11yControls();">
+              <span>Light</span>
+            </label>
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 14px; border: 1px solid var(--border-hairline); border-radius: var(--radius-md); min-height: 48px; box-sizing: border-box;">
+              <input type="radio" id="theme-radio-dark" name="a11y-theme" value="dark" onchange="setTheme('dark'); updateA11yControls();">
+              <span>Dark</span>
+            </label>
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 14px; border: 1px solid var(--border-hairline); border-radius: var(--radius-md); min-height: 48px; box-sizing: border-box;">
+              <input type="radio" id="theme-radio-high-contrast" name="a11y-theme" value="high-contrast" onchange="setTheme('high-contrast'); updateA11yControls();">
+              <span>High Contrast</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- 3. Font Family -->
+        <fieldset class="a11y-setting-group" style="border: none; padding: 0; margin: 0;">
+          <legend style="font-weight: 600; margin-bottom: 8px;">Font Family</legend>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 14px; border: 1px solid var(--border-hairline); border-radius: var(--radius-md); min-height: 48px; box-sizing: border-box;">
+              <input type="radio" id="font-radio-noto" name="a11y-font" value="noto" onchange="setFontChoice('noto'); updateA11yControls();">
+              <span>Easy to read (Noto Sans)</span>
+            </label>
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 14px; border: 1px solid var(--border-hairline); border-radius: var(--radius-md); min-height: 48px; box-sizing: border-box;">
+              <input type="radio" id="font-radio-dyslexic" name="a11y-font" value="dyslexic" onchange="setFontChoice('dyslexic'); updateA11yControls();">
+              <span>Dyslexia-friendly (Atkinson Hyperlegible)</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- 4. Reduce Motion -->
+        <fieldset class="a11y-setting-group" style="border: none; padding: 0; margin: 0;">
+          <legend style="font-weight: 600; margin-bottom: 8px;">Reduce Motion</legend>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 14px; border: 1px solid var(--border-hairline); border-radius: var(--radius-md); min-height: 48px; box-sizing: border-box;">
+              <input type="radio" id="motion-radio-off" name="a11y-motion" value="off" onchange="setReduceMotion(false); updateA11yControls();">
+              <span>Off (Standard motion)</span>
+            </label>
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 14px; border: 1px solid var(--border-hairline); border-radius: var(--radius-md); min-height: 48px; box-sizing: border-box;">
+              <input type="radio" id="motion-radio-on" name="a11y-motion" value="on" onchange="setReduceMotion(true); updateA11yControls();">
+              <span>On (Reduce motion)</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- 5. Line Spacing -->
+        <fieldset class="a11y-setting-group" style="border: none; padding: 0; margin: 0;">
+          <legend style="font-weight: 600; margin-bottom: 8px;">Line Spacing</legend>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 14px; border: 1px solid var(--border-hairline); border-radius: var(--radius-md); min-height: 48px; box-sizing: border-box;">
+              <input type="radio" id="spacing-radio-normal" name="a11y-spacing" value="normal" onchange="setLineSpacing('normal'); updateA11yControls();">
+              <span>Normal</span>
+            </label>
+            <label style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer; padding: 10px 14px; border: 1px solid var(--border-hairline); border-radius: var(--radius-md); min-height: 48px; box-sizing: border-box;">
+              <input type="radio" id="spacing-radio-relaxed" name="a11y-spacing" value="relaxed" onchange="setLineSpacing('relaxed'); updateA11yControls();">
+              <span>Relaxed</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <!-- 6. Reset all to default -->
+        <div style="border-top: 1px solid var(--border-hairline); padding-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap;">
+          <button id="btn-a11y-reset-all" type="button" class="notion-btn-subtle" onclick="resetAllAccessibilitySettings()" style="min-height: 48px;">
+            <span>↺ Reset all to default</span>
+          </button>
+          <button type="button" class="notion-btn-primary" onclick="closeAccessibilityModal()" style="min-height: 48px; min-width: 90px;">
+            <span>Done</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </body>
 </html>
+
