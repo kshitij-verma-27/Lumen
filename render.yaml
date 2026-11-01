@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: lumen-backend
+    env: python
+    region: singapore
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.8
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
+      - key: FORCE_MOCK
+        value: "false"
+      - key: CONTACT_URL
+        value: https://github.com/kshitij-verma-27/Lumen
+      - key: ALLOWED_ORIGINS
+        value: "https://lumen-app.vercel.app,http://localhost:5173,http://127.0.0.1:5173"
+      - key: DARKSPOT_DB
+        value: darkspot.db

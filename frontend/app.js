@@ -14,6 +14,83 @@ let templatesCache = {};
 let activeFacets = [];
 let currentConflictExplanations = [];
 
+// ==========================================
+// API Routing & Resilience (Render / Vercel Split)
+// ==========================================
+function apiUrl(path) {
+  const base = (window.APP_CONFIG && window.APP_CONFIG.API_BASE)
+    ? window.APP_CONFIG.API_BASE.replace(/\/+$/, "")
+    : "";
+  const p = path.startsWith("/") ? path : "/" + path;
+  return base + p;
+}
+
+let activeWarmupTimer = null;
+let lastFailedOperation = null;
+
+function showWarmupBanner(msg, showRetry = false) {
+  const banner = document.getElementById("server-warmup-banner");
+  const text = document.getElementById("warmup-banner-text");
+  const retryBtn = document.getElementById("btn-warmup-retry");
+  const spinner = banner ? banner.querySelector(".warmup-spinner") : null;
+  if (!banner) return;
+  if (text) text.innerText = msg || "The server is waking up, this can take up to a minute on the free plan...";
+  if (retryBtn) retryBtn.style.display = showRetry ? "inline-block" : "none";
+  if (spinner) spinner.style.display = showRetry ? "none" : "inline-block";
+  banner.style.display = "flex";
+}
+
+function hideWarmupBanner() {
+  if (activeWarmupTimer) {
+    clearTimeout(activeWarmupTimer);
+    activeWarmupTimer = null;
+  }
+  const banner = document.getElementById("server-warmup-banner");
+  if (banner) banner.style.display = "none";
+}
+
+function retryLastOperation() {
+  hideWarmupBanner();
+  if (typeof lastFailedOperation === "function") {
+    lastFailedOperation();
+  } else {
+    window.location.reload();
+  }
+}
+
+async function apiFetch(path, options = {}) {
+  const url = apiUrl(path);
+  const method = (options.method || "GET").toUpperCase();
+  const maxRetries = method === "GET" ? 3 : 1;
+  let attempt = 0;
+  let delay = 1000;
+
+  // Show cold-start warmup banner if request takes > 3 seconds
+  const localTimer = setTimeout(() => {
+    showWarmupBanner("The server is waking up, this can take up to a minute on the free plan...");
+  }, 3000);
+
+  while (attempt < maxRetries) {
+    attempt++;
+    try {
+      const res = await fetch(url, options);
+      clearTimeout(localTimer);
+      hideWarmupBanner();
+      return res;
+    } catch (err) {
+      if (attempt >= maxRetries) {
+        clearTimeout(localTimer);
+        lastFailedOperation = () => apiFetch(path, options);
+        showWarmupBanner(`Network connection issue (${err.message || "Server unavailable"}).`, true);
+        throw err;
+      }
+      await new Promise(r => setTimeout(r, delay));
+      delay *= 1.5;
+    }
+  }
+}
+
+
 // Default Presets for the 6 Topic Cards
 const DEFAULT_TOPIC_PRESETS = {
   exams: {
@@ -80,7 +157,7 @@ const DEFAULT_TOPIC_PRESETS = {
 
 async function checkHealth() {
   try {
-    const res = await fetch("/api/health");
+    const res = await apiFetch("/api/health");
     if (!res.ok) return;
     const data = await res.json();
     const modeEl = document.getElementById("header-mode-indicator") || document.getElementById("llm-mode-badge");
@@ -94,7 +171,7 @@ async function checkHealth() {
 
 async function loadSampleSources() {
   try {
-    const res = await fetch("/api/sample-sources");
+    const res = await apiFetch("/api/sample-sources");
     if (!res.ok) return;
     const data = await res.json();
     sampleSourcesCache = data.samples || [];
@@ -105,7 +182,7 @@ async function loadSampleSources() {
 
 async function loadTemplates() {
   try {
-    const res = await fetch("/api/templates");
+    const res = await apiFetch("/api/templates");
     if (!res.ok) return;
     const data = await res.json();
     (data.templates || []).forEach(t => {
@@ -635,7 +712,7 @@ async function evaluateApplicabilityIfProfileExists() {
       goal: profile.goal
     };
 
-    const res = await fetch(`/api/sessions/${currentSessionId}/applicability`, {
+    const res = await apiFetch(`/api/sessions/${currentSessionId}/applicability`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -751,7 +828,7 @@ async function launchTopicInvestigation(topicId) {
       const sourcesPayload = {
         sources: topic.urls.map(u => ({ url: u }))
       };
-      await fetch(`/api/sessions/${currentSessionId}/sources`, {
+      await apiFetch(`/api/sessions/${currentSessionId}/sources`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(sourcesPayload)
@@ -892,13 +969,13 @@ async function loadHistoricalSession(sessionId, title) {
 
     let indData = { count: currentSources.length, clusters: 1 };
     try {
-      const indRes = await fetch(`/api/sessions/${currentSessionId}/independence`);
+      const indRes = await apiFetch(`/api/sessions/${currentSessionId}/independence`);
       if (indRes.ok) indData = await indRes.json();
     } catch(e) {}
 
     let rtData = { extracted_count: 0, verified_count: 0, refuted_count: 0, counter_text: "0 checked" };
     try {
-      const rtRes = await fetch(`/api/sessions/${currentSessionId}/red-team`);
+      const rtRes = await apiFetch(`/api/sessions/${currentSessionId}/red-team`);
       if (rtRes.ok) rtData = await rtRes.json();
     } catch(e) {}
 
@@ -1064,7 +1141,7 @@ async function generateFacetsWithAI() {
   btn.innerHTML = `<span>⏳</span> Generating Facets...`;
 
   try {
-    const res = await fetch("/api/facets/generate", {
+    const res = await apiFetch("/api/facets/generate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ goal, domain_type: "custom" })
@@ -1198,7 +1275,7 @@ async function initializeSession() {
   }
 
   try {
-    const res = await fetch("/api/sessions", {
+    const res = await apiFetch("/api/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1237,7 +1314,7 @@ async function runOneClickDemo() {
 
     // 1. Initialize session if not active
     if (!currentSessionId) {
-      const res = await fetch("/api/sessions", {
+      const res = await apiFetch("/api/sessions", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -1264,7 +1341,7 @@ async function runOneClickDemo() {
       }))
     };
 
-    await fetch(`/api/sessions/${currentSessionId}/sources`, {
+    await apiFetch(`/api/sessions/${currentSessionId}/sources`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(sourcesPayload)
@@ -1329,7 +1406,7 @@ async function submitCustomSource() {
   }
 
   try {
-    const res = await fetch(`/api/sessions/${currentSessionId}/sources`, {
+    const res = await apiFetch(`/api/sessions/${currentSessionId}/sources`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ sources: [sourceObj] })
@@ -1358,7 +1435,7 @@ async function loadSources() {
   if (!currentSessionId) return;
 
   try {
-    const res = await fetch(`/api/sessions/${currentSessionId}/sources`);
+    const res = await apiFetch(`/api/sessions/${currentSessionId}/sources`);
     const data = await res.json();
     currentSources = data.sources || [];
 
@@ -1444,7 +1521,7 @@ async function runExtraction() {
   }
 
   try {
-    const res = await fetch(`/api/sessions/${currentSessionId}/extract`, {
+    const res = await apiFetch(`/api/sessions/${currentSessionId}/extract`, {
       method: "POST"
     });
     await res.json();
@@ -1468,7 +1545,7 @@ async function loadClaims() {
   if (!currentSessionId) return;
 
   try {
-    const res = await fetch(`/api/sessions/${currentSessionId}/claims`);
+    const res = await apiFetch(`/api/sessions/${currentSessionId}/claims`);
     const data = await res.json();
     currentClaims = data.claims || [];
 
@@ -1489,7 +1566,7 @@ async function loadClaims() {
 
     // Fetch and display Red-Team verifier counter
     try {
-      const rtRes = await fetch(`/api/sessions/${currentSessionId}/red-team`);
+      const rtRes = await apiFetch(`/api/sessions/${currentSessionId}/red-team`);
       const rtData = await rtRes.json();
       const pillRt = document.getElementById("pill-redteam");
       const statRt = document.getElementById("stat-redteam-counter");
@@ -1517,7 +1594,7 @@ async function loadGaps() {
   if (!currentSessionId) return;
 
   try {
-    const res = await fetch(`/api/sessions/${currentSessionId}/detect`, {
+    const res = await apiFetch(`/api/sessions/${currentSessionId}/detect`, {
       method: "POST"
     });
     const data = await res.json();
@@ -1612,7 +1689,7 @@ async function applyCycleOverride() {
   btn.innerText = "Updating...";
 
   try {
-    const res = await fetch(`/api/sessions/${currentSessionId}/version-period`, {
+    const res = await apiFetch(`/api/sessions/${currentSessionId}/version-period`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ target_version_period: newVP })
@@ -1635,7 +1712,7 @@ async function resetCycleOverride() {
   btn.disabled = true;
 
   try {
-    const res = await fetch(`/api/sessions/${currentSessionId}/version-period`, {
+    const res = await apiFetch(`/api/sessions/${currentSessionId}/version-period`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ target_version_period: null })
@@ -1656,7 +1733,7 @@ async function loadMatrix() {
   if (!currentSessionId) return;
 
   try {
-    const res = await fetch(`/api/sessions/${currentSessionId}/matrix`);
+    const res = await apiFetch(`/api/sessions/${currentSessionId}/matrix`);
     currentMatrix = await res.json();
 
     const score = currentMatrix.stats ? currentMatrix.stats.coverage_score : 0;
@@ -2310,7 +2387,7 @@ function escapeHtml(str) {
 
 async function recheckSource(sourceId) {
   try {
-    const res = await fetch(`/api/sources/${sourceId}/recheck`, { method: "POST" });
+    const res = await apiFetch(`/api/sources/${sourceId}/recheck`, { method: "POST" });
     const data = await res.json();
     const changeNote = "Note: any text change counts, including small page edits";
     if (data.changed) {
@@ -2388,7 +2465,7 @@ function exportAuditTrailJson() {
     alert("Please initialize or select a session first.");
     return;
   }
-  window.open(`/api/sessions/${currentSessionId}/export/json`, "_blank");
+  window.open(apiUrl(`/api/sessions/${currentSessionId}/export/json`), "_blank");
 }
 
 function exportAuditTrailHtml() {
@@ -2396,7 +2473,7 @@ function exportAuditTrailHtml() {
     alert("Please initialize or select a session first.");
     return;
   }
-  window.open(`/api/sessions/${currentSessionId}/export/html`, "_blank");
+  window.open(apiUrl(`/api/sessions/${currentSessionId}/export/html`), "_blank");
 }
 
 // ==========================================
@@ -2409,7 +2486,7 @@ let allRegistrySourcesCache = [];
 // 1. Snapshot Banner
 async function loadSnapshotBanner() {
   try {
-    const res = await fetch("/api/snapshot-status");
+    const res = await apiFetch("/api/snapshot-status");
     const data = await res.json();
     const textEl = document.getElementById("snapshot-status-text");
     if (textEl) {
@@ -2433,7 +2510,7 @@ async function refreshLiveSnapshot() {
   }
 
   try {
-    const res = await fetch("/api/refresh-live", { method: "POST" });
+    const res = await apiFetch("/api/refresh-live", { method: "POST" });
     const data = await res.json();
     await loadSnapshotBanner();
     await loadHomeRecentEntities();
@@ -2451,7 +2528,7 @@ async function loadHomeRecentEntities() {
   if (!container) return;
 
   try {
-    const res = await fetch("/api/entities?limit=6");
+    const res = await apiFetch("/api/entities?limit=6");
     const data = await res.json();
     const entities = data.entities || [];
 
@@ -2520,7 +2597,7 @@ async function loadCategoryEntities(catId) {
   container.innerHTML = `<div class="history-empty">Loading entities for ${escapeHtml(catId)}...</div>`;
 
   try {
-    const res = await fetch(`/api/entities?domain=${catId}`);
+    const res = await apiFetch(`/api/entities?domain=${catId}`);
     const data = await res.json();
     const entities = data.entities || [];
 
@@ -2564,7 +2641,7 @@ async function executeEntitySearch(query) {
   updateBreadcrumb(`Search: "${query}"`);
 
   try {
-    const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`);
+    const res = await apiFetch(`/api/search?q=${encodeURIComponent(query)}`);
     const data = await res.json();
     const entities = data.entities || [];
 
@@ -2600,7 +2677,7 @@ async function executeEntitySearch(query) {
 // 5. Entity Detail & 5 Tabs
 async function loadEntityDetails(entityId) {
   try {
-    const res = await fetch(`/api/entities/${entityId}`);
+    const res = await apiFetch(`/api/entities/${entityId}`);
     if (!res.ok) throw new Error(`Entity not found (${res.status})`);
     const entity = await res.json();
     activeEntityData = entity;
@@ -2845,7 +2922,7 @@ async function loadEntityGaps(entityId) {
   container.innerHTML = `<div class="history-empty">Running gap detection and coverage matrix engine...</div>`;
 
   try {
-    const res = await fetch(`/api/entities/${entityId}/gaps`);
+    const res = await apiFetch(`/api/entities/${entityId}/gaps`);
     const data = await res.json();
     const gaps = data.gaps || [];
     const conflicts = data.conflicts || [];
@@ -3016,7 +3093,7 @@ async function loadRegistryAudit() {
   tbody.innerHTML = `<tr><td colspan="8" style="text-align: center;">Loading 29 official sources...</td></tr>`;
 
   try {
-    const res = await fetch("/api/registry");
+    const res = await apiFetch("/api/registry");
     const data = await res.json();
     allRegistrySourcesCache = data.sources || [];
     renderRegistryTable(allRegistrySourcesCache);
@@ -3134,7 +3211,7 @@ async function submitAddRegistrySource() {
   if (submitBtn) submitBtn.innerText = "Validating SSRF & Host...";
 
   try {
-    const res = await fetch("/api/registry", {
+    const res = await apiFetch("/api/registry", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -3198,7 +3275,7 @@ async function loadSourceDetails(sourceId) {
   if (nameTitle) nameTitle.innerText = "Loading source details...";
 
   try {
-    const res = await fetch(`/api/sources/${sourceId}`);
+    const res = await apiFetch(`/api/sources/${sourceId}`);
     if (!res.ok) throw new Error(`Source not found (${res.status})`);
     const src = await res.json();
     currentSourceData = src;
@@ -3295,7 +3372,7 @@ async function recheckCurrentSource() {
   if (btn) btn.innerText = "⏳ Re-checking...";
 
   try {
-    const res = await fetch(`/api/sources/${currentSourceData.id}/recheck`, { method: "POST" });
+    const res = await apiFetch(`/api/sources/${currentSourceData.id}/recheck`, { method: "POST" });
     const data = await res.json();
     if (alertEl) {
       alertEl.style.display = "block";
@@ -3363,7 +3440,7 @@ async function submitPastedDocument() {
 
   if (currentSessionId) {
     try {
-      await fetch(`/api/sessions/${currentSessionId}/sources`, {
+      await apiFetch(`/api/sessions/${currentSessionId}/sources`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -3926,7 +4003,7 @@ async function handleComposerSubmit() {
     }
 
     // 1. Create Session
-    const sessRes = await fetch("/api/sessions", {
+    const sessRes = await apiFetch("/api/sessions", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -3946,7 +4023,7 @@ async function handleComposerSubmit() {
     if (goalInput) goalInput.value = query;
 
     // 2. Ingest Sources
-    await fetch(`/api/sessions/${currentSessionId}/sources`, {
+    await apiFetch(`/api/sessions/${currentSessionId}/sources`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -3961,7 +4038,7 @@ async function handleComposerSubmit() {
     await loadSources();
 
     // 3. Run Extraction
-    await fetch(`/api/sessions/${currentSessionId}/extract`, { method: "POST" });
+    await apiFetch(`/api/sessions/${currentSessionId}/extract`, { method: "POST" });
 
     // 4. Load Claims, Gaps, Matrix, Independence
     await loadClaims();
@@ -3970,13 +4047,13 @@ async function handleComposerSubmit() {
 
     let indData = { count: currentSourcesSnapshot.length, clusters: 1 };
     try {
-      const indRes = await fetch(`/api/sessions/${currentSessionId}/independence`);
+      const indRes = await apiFetch(`/api/sessions/${currentSessionId}/independence`);
       if (indRes.ok) indData = await indRes.json();
     } catch(e) {}
 
     let rtData = { extracted_count: 0, verified_count: 0, refuted_count: 0, counter_text: "0 checked" };
     try {
-      const rtRes = await fetch(`/api/sessions/${currentSessionId}/red-team`);
+      const rtRes = await apiFetch(`/api/sessions/${currentSessionId}/red-team`);
       if (rtRes.ok) rtData = await rtRes.json();
     } catch(e) {}
 
@@ -4294,7 +4371,7 @@ function renderChatAssistantResult(assistantMsgId, query, sources, indData, rtDa
   contentEl.innerHTML = html;
 
   // Conditionally show /api/ask follow-up if endpoint exists
-  fetch("/api/ask", { method: "HEAD" }).then(res => {
+  apiFetch("/api/ask", { method: "GET" }).then(res => {
     if (res.ok) {
       const box = document.getElementById(`followup-box-${assistantMsgId}`);
       if (box) box.style.display = "block";

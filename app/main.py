@@ -10,6 +10,8 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse, HTMLResponse
 
 from app.database import init_db, get_db_connection, row_to_dict
+from app.bootstrap import bootstrap_app
+from app.middleware import PublicSafetyMiddleware
 from app.models import (
     ResearchSessionCreate, SessionDetailResponse, SourcesAddRequest,
     ClaimResponse, SourceResponse, HealthStatus, FacetDefinition,
@@ -23,8 +25,8 @@ from app.extract import get_template_facets, extract_claims_for_source
 from app.llm import get_llm_status, is_mock_mode, generate_facets_from_goal
 from app.independence import detect_and_group_sources
 
-# Initialize database on startup
-init_db()
+# Startup bootstrap: init DB, seed registry from data/registry.yaml, and populate demo snapshot if empty
+bootstrap_app()
 
 app = FastAPI(
     title="Lumen",
@@ -32,11 +34,35 @@ app = FastAPI(
     version="1.0.0"
 )
 
+@app.on_event("startup")
+def on_startup():
+    bootstrap_app()
+
+# Public Safety Middleware (Rate limiting & Size Cap)
+app.add_middleware(PublicSafetyMiddleware)
+
+# Environment-configurable CORS
+allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "")
+if allowed_origins_env.strip():
+    origins = [o.strip() for o in allowed_origins_env.split(",") if o.strip()]
+else:
+    origins = [
+        "http://127.0.0.1:8000",
+        "http://localhost:8000",
+        "http://127.0.0.1:5173",
+        "http://localhost:5173",
+        "http://127.0.0.1:8001",
+        "http://localhost:8001"
+    ]
+
+allowed_origin_regex = os.environ.get("ALLOWED_ORIGIN_REGEX", r"^https:\/\/.*\.vercel\.app$")
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
+    allow_origins=origins,
+    allow_origin_regex=allowed_origin_regex,
+    allow_credentials=False,
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -52,6 +78,11 @@ def health_check():
         database="connected",
         fallback_reason=llm_info.get("fallback_reason")
     )
+
+
+@app.api_route("/api/ask", methods=["GET", "HEAD", "POST"])
+def ask_endpoint():
+    return {"status": "ok", "message": "Lumen follow-up query service"}
 
 
 @app.get("/api/templates")
@@ -963,3 +994,8 @@ if frontend_path.exists():
     @app.get("/")
     def serve_index():
         return FileResponse(frontend_path / "index.html")
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)

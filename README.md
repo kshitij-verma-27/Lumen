@@ -121,7 +121,81 @@ DARKSPOT_DB=darkspot.db
 PORT=8000
 HOST=127.0.0.1
 DEBUG=True
+ALLOWED_ORIGINS=http://127.0.0.1:8000,http://localhost:8000,http://127.0.0.1:5173
 ```
+
+---
+
+## Deploy: backend on Render, frontend on Vercel
+
+Lumen is engineered for a split deployment architecture where the static frontend is hosted on **Vercel** and the FastAPI backend runs on **Render** as a web service. The Render service also serves the full application at its own root URL as an instant fallback.
+
+### 1. Backend Deployment (Render)
+
+1. **Create Web Service**:
+   - In the [Render Dashboard](https://dashboard.render.com/), click **New +** > **Web Service** and connect your GitHub repository.
+   - Alternatively, deploy directly using the included [`render.yaml`](file:///render.yaml) Infrastructure-as-Code blueprint.
+
+2. **Build & Runtime Configuration**:
+   - **Environment**: `Python 3`
+   - **Region**: `Singapore` (or nearest available region)
+   - **Plan**: `Free`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+   - **Health Check Path**: `/api/health`
+
+3. **Environment Variables**:
+   Set the following variables in the Render service settings (**Environment** tab):
+   - `PYTHON_VERSION`: `3.11.9`
+   - `PORT`: (Managed automatically by Render; defaults to 8000 locally)
+   - `ALLOWED_ORIGINS`: `https://<your-app>.vercel.app,http://127.0.0.1:8000,http://localhost:8000` (comma-separated list of permitted origins, no wildcard `*`)
+   - `ALLOWED_ORIGIN_REGEX`: `https://.*\\.vercel\\.app` (optional, for Vercel preview branch deployments)
+   - `GEMINI_API_KEY`: *(Optional)* Your Google Gemini API key (sync: false). If left unset, Lumen runs safely in labelled deterministic mock mode.
+   - `GEMINI_MODEL`: `gemini-2.5-flash` (or `gemini-1.5-flash`)
+   - `FORCE_MOCK`: `false` (set to `true` to force deterministic mock mode regardless of API key presence)
+   - `CONTACT_URL`: `https://github.com/kshitij-verma-27/Lumen`
+
+4. **Zero-Network Idempotent Bootstrap**:
+   - On container startup, the application executes `init_db()`, seeds all 29 official portals from `data/registry.yaml`, and populates sample entities from `data/demo_snapshot.json` if the entities table is empty.
+   - No external network calls are made during bootstrap.
+   - Public safety is enforced via `PublicSafetyMiddleware`: 5MB payload limit, 20 requests per minute on `/api/` (exempting `/api/health`), and 5 investigations per hour per IP.
+
+---
+
+### 2. Frontend Deployment (Vercel)
+
+1. **Import Repository**:
+   - In the [Vercel Dashboard](https://vercel.com/), click **Add New Project** and import the repository.
+
+2. **Project Settings**:
+   - **Framework Preset**: `Other`
+   - **Root Directory**: `frontend`
+   - **Build Command**: Leave empty (no build step; pure vanilla JavaScript and CSS)
+   - **Output Directory**: `.` (or root of `frontend`)
+
+3. **Backend API Connection**:
+   - In `frontend/config.js`, configure `API_BASE` with your Render backend URL:
+     ```javascript
+     window.APP_CONFIG = {
+       API_BASE: "https://<your-render-service>.onrender.com"
+     };
+     ```
+   - All network calls, `EventSource` streams, and report downloads route through `apiUrl(path) = (window.APP_CONFIG.API_BASE || "") + path`.
+
+4. **Headers and Routing**:
+   - The included `frontend/vercel.json` applies `cleanUrls: true` and caching headers:
+     - Fonts (`/fonts/*`): `public, max-age=31536000, immutable`
+     - Static assets: `public, max-age=3600`
+   - Hash routing (`#/`, `#/registry`, `#/entity/:id`) is used throughout, requiring zero server-side rewrite rules.
+   - Resilience: Background warm-up ping to `/api/health`, automatic 3-second cold-start notification banner with progress spinner, 3x GET retry with exponential backoff, and a retry banner for network or CORS interruptions.
+
+---
+
+### 3. Fallback: Full App on Render
+
+If Vercel is unavailable, the Render backend automatically serves the full application at its own root `/` URL:
+- When accessed directly on Render, `frontend/config.js` with `API_BASE: ""` makes all API calls relative to the same origin.
+- All investigation, comparison matrix, registry management, and report export features remain fully functional.
 
 ---
 
